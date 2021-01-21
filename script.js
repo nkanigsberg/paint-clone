@@ -1,14 +1,47 @@
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, active = false) {
+  constructor(coordinates, active = false, hover = false) {
     this.coordinates = coordinates;
     this.active = active;
+    this.hover = hover;
   }
 
+  /** Toggle whether or not this cell is active */
   toggleActive() {
     this.active = !this.active;
     life.drawBoard();
   }
+
+  /** if this cell isn't already hovered, enable its hover state (and disable other cell hover states) */
+  enableHover() {
+    if (!this.hover) {
+      this.hover = true;
+      life.drawBoard();
+      
+      // console.log(life.previousHover);
+
+      // if another cell is currently hovered - disable its hover
+      if (life.previousHover.coordinates) {
+        // console.log('life.previousHover.length');
+        const prevCoords = life.previousHover.coordinates;
+
+        life.board[prevCoords.y][prevCoords.x].disableHover();
+      }
+
+      // set this cell as the previously hovered cell
+      life.previousHover = this;
+    }
+  }
+
+  /** disable this cell's hover state */
+  disableHover() {
+    console.log('disable hover');
+    if (this.hover) {
+      this.hover = false;
+      life.drawBoard();
+    }
+  }
+
 }
 
 
@@ -29,14 +62,17 @@ life.ctx = life.canvas.getContext("2d");
 /** The 2D array representation of the game board */
 life.board = [];
 
+/** The previously hovered cell (so can disable hover) */
+life.previousHover = {};
+
 /** Create 2D array and draw the board */
 life.initializeBoard = () => {
   for (let y = 0; y < life.NUM_ROWS; y++) {
     life.board.push([]);
     for (let x = 0; x < life.NUM_COLUMNS; x++) {
       const coordinates = {
-        y: y * life.CELL_HEIGHT,
-        x: x * life.CELL_WIDTH,
+        y,
+        x,
       };
 
       life.board[y].push(new Cell(coordinates));
@@ -57,35 +93,42 @@ life.drawBoard = () => {
   // draw each cell
   life.board.forEach(row => {
     row.forEach(cell => {
+      const coordX = cell.coordinates.x * life.CELL_WIDTH;
+      const coordY = cell.coordinates.y * life.CELL_HEIGHT;
+
       if (cell.active) {
-        ctx.fillRect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
+        ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
       } else {
-        ctx.strokeRect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
+        ctx.strokeRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+      }
+
+      if (cell.hover) {
+        ctx.fillStyle = 'rgba(252, 186, 3, 0.5)';
+        ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
       }
     })
   })
 }
 
-// /** add hover effect when cursor over a cell */
-// life.mouseMoveHandler = e => {
-//   const relativeX = e.clientX - life.canvas.offsetLeft;
-//   if (relativeX > 0 && relativeX < life.canvas.width) {
-//     life.ctx.fillRect(relativeX, 25, life.CELL_WIDTH, life.CELL_HEIGHT);
-//   }
-// }
+
+
+/** add hover effect when cursor over a cell */
+life.mouseMoveHandler = e => {
+  // get cell position
+  const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
+  const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
+
+  life.board[cellY][cellX].enableHover();
+}
 
 /** toggle whether cell is active on click */
 life.mouseDownHandler = e => {
-  // only trigger if clicking on canvas
-  if (e.target === life.canvas) {
-    // get cell position from click
-    const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
-    const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
-    console.log('x:', cellX, 'y:', cellY);
+  // get cell position from click
+  const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
+  const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
 
-    // toggle cell active
-    life.board[cellY][cellX].toggleActive();
-  }
+  // toggle cell active
+  life.board[cellY][cellX].toggleActive();
 }
 
 /** Initialize the game */
@@ -98,8 +141,8 @@ life.init = () => {
   life.initializeBoard();
 
   // mouse listeners
-  // document.addEventListener("mousemove", life.mouseMoveHandler, false);
-  document.addEventListener("mousedown", life.mouseDownHandler, false);
+  life.canvas.addEventListener("mousemove", life.mouseMoveHandler, false);
+  life.canvas.addEventListener("mousedown", life.mouseDownHandler, false);
 
 }
 
