@@ -4,6 +4,8 @@
   // add play mode (vs. placement mode)
    // toggle button
 
+// ========================== Cell ======================== //
+
 /** Class representing a Cell */
 class Cell {
   constructor(coordinates, active = false, hover = false) {
@@ -12,17 +14,23 @@ class Cell {
     this.hover = hover;
   }
 
+  styles = {
+    empty: 'rgb(0, 0, 0)',
+    active: 'rgb(255, 255, 255)',
+    hover: 'rgba(252, 186, 3, 0.25)',
+  }
+
   /** Toggle whether or not this cell is active */
   toggleActive() {
     this.active = !this.active;
-    life.drawBoard();
+    this.draw();
   }
 
   /** if this cell isn't already hovered, enable its hover state (and disable other cell hover states) */
   enableHover() {
     if (!this.hover) {
       this.hover = true;
-      life.drawBoard();
+      this.draw();
       
       // if another cell is currently hovered - disable its hover
       if (life.previousHover.coordinates) {
@@ -40,12 +48,15 @@ class Cell {
   disableHover() {
     if (this.hover) {
       this.hover = false;
-      life.drawBoard();
+      this.draw();
     }
   }
 
   /** draw this cell on the canvas */
   draw() {
+    // erase this cell before (re)drawing
+    this.erase();
+
     const ctx = life.ctx;
     const coordX = this.coordinates.x * life.CELL_WIDTH;
     const coordY = this.coordinates.y * life.CELL_HEIGHT;
@@ -57,14 +68,26 @@ class Cell {
     }
 
     if (this.hover) {
-      ctx.fillStyle = 'rgba(252, 186, 3, 0.25)';
+      ctx.fillStyle = this.styles.hover;
       ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
-      ctx.fillStyle = 'rgb(0, 0, 0)';
-    }
+      ctx.fillStyle = this.styles.empty;
+    } 
   }
 
+  /** erase the cell from the canvas */
+  erase() {
+    const ctx = life.ctx;
+    const coordX = this.coordinates.x * life.CELL_WIDTH;
+    const coordY = this.coordinates.y * life.CELL_HEIGHT;
+
+    ctx.clearRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+  }
 }
 
+
+
+
+// ==================== Life ==================== //
 
 /** @namespace life */
 const life = {};
@@ -72,8 +95,8 @@ const life = {};
 // constants
 life.CELL_WIDTH = 20;
 life.CELL_HEIGHT = 20;
-life.BOARD_WIDTH = 500;
-life.BOARD_HEIGHT = 360;
+life.BOARD_WIDTH = 800;
+life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
 
@@ -93,23 +116,16 @@ life.initializeBoard = () => {
   for (let y = 0; y < life.NUM_ROWS; y++) {
     life.board.push([]);
     for (let x = 0; x < life.NUM_COLUMNS; x++) {
-      const coordinates = {
-        y,
-        x,
-      };
-
-      life.board[y].push(new Cell(coordinates));
+      life.board[y].push(new Cell({ y, x }));
     }
   }
-  console.log(life.board);
+  // console.log(life.board);
 
   life.drawBoard();
 }
 
 /** Draw the board on the canvas */
 life.drawBoard = () => {
-  const ctx = life.ctx;
-
   // clear canvas before each draw
   life.clearBoard();
 
@@ -126,11 +142,16 @@ life.clearBoard = () => {
   life.ctx.clearRect(0, 0, life.canvas.width, life.canvas.height);
 }
 
+
+
+
+// ==================== Event Handlers ====================== //
+
 /** add hover effect when cursor over a cell */
 life.mouseMoveHandler = e => {
   // get cell position
-  const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
-  const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
+  const cellX = Math.floor((e.pageX - life.canvas.offsetLeft) / life.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - life.canvas.offsetTop) / life.CELL_HEIGHT);
 
   // enable hover only if hovering over a cell
   if (cellY < life.BOARD_HEIGHT / life.CELL_HEIGHT && cellX < life.BOARD_WIDTH / life.CELL_WIDTH)
@@ -140,8 +161,8 @@ life.mouseMoveHandler = e => {
 /** toggle whether cell is active on click */
 life.mouseDownHandler = e => {
   // get cell position from click
-  const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
-  const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
+  const cellX = Math.floor((e.pageX - life.canvas.offsetLeft) / life.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - life.canvas.offsetTop) / life.CELL_HEIGHT);
 
   // toggle cell active (only if clicking on a cell)
   if (cellY < life.BOARD_HEIGHT / life.CELL_HEIGHT && cellX < life.BOARD_WIDTH / life.CELL_WIDTH)
@@ -166,7 +187,9 @@ life.clearBtnClickHandler = () => {
   life.drawBoard();
 }
 
-/** Initialize the game */
+
+
+// ==================== Initialize =================== //
 life.init = () => {
   // set html canvas dimensions
   life.canvas.setAttribute('width', life.BOARD_WIDTH);
@@ -186,8 +209,7 @@ life.init = () => {
 }
 
 
-
-/* ==================== Document Ready ==================== */
+// ==================== Document Ready ==================== //
 (() => {
   life.init();
 })()
