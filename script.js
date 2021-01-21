@@ -1,3 +1,9 @@
+// TODO
+  // clear individual cells instead of redrawing entire canvas - massive performance gain
+  // click and drag to place multiple cells (nice to have)
+  // add play mode (vs. placement mode)
+   // toggle button
+
 /** Class representing a Cell */
 class Cell {
   constructor(coordinates, active = false, hover = false) {
@@ -55,6 +61,8 @@ life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
 life.canvas = document.getElementById("lifeCanvas");
 life.ctx = life.canvas.getContext("2d");
 
+life.clearBtn = document.getElementById("clear");
+
 /** The 2D array representation of the game board */
 life.board = [];
 
@@ -84,7 +92,7 @@ life.drawBoard = () => {
   const ctx = life.ctx;
 
   // clear canvas before each draw
-  ctx.clearRect(0, 0, life.canvas.width, life.canvas.height);
+  life.clearBoard();
 
   // draw each cell
   life.board.forEach(row => {
@@ -107,6 +115,10 @@ life.drawBoard = () => {
   })
 }
 
+/** clear the the board */
+life.clearBoard = () => {
+  life.ctx.clearRect(0, 0, life.canvas.width, life.canvas.height);
+}
 
 /** add hover effect when cursor over a cell */
 life.mouseMoveHandler = e => {
@@ -136,6 +148,18 @@ life.mouseLeaveHandler = () => {
   life.board[prevHoverCoords.y][prevHoverCoords.x].disableHover();
 }
 
+/** clear board and canvas on click */
+life.clearBtnClickHandler = () => {
+  // loop through board and set all cells to inactive
+  life.board.forEach(row => {
+    row.forEach(cell => {
+      cell.active = false;
+    })
+  })
+  // draw the cleared board
+  life.drawBoard();
+}
+
 /** Initialize the game */
 life.init = () => {
   // set html canvas dimensions
@@ -146,9 +170,12 @@ life.init = () => {
   life.initializeBoard();
 
   // mouse listeners
-  life.canvas.addEventListener("mousemove", life.mouseMoveHandler, false);
-  life.canvas.addEventListener("mousedown", life.mouseDownHandler, false);
-  life.canvas.addEventListener("mouseleave", life.mouseLeaveHandler, false);
+  life.canvas.addEventListener("mousemove", life.mouseMoveHandler);
+  life.canvas.addEventListener("mousedown", life.mouseDownHandler);
+  life.canvas.addEventListener("mouseleave", life.mouseLeaveHandler);
+
+  // button listeners
+  life.clearBtn.addEventListener("click", life.clearBtnClickHandler);
 
 }
 
