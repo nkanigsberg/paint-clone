@@ -44,6 +44,25 @@ class Cell {
     }
   }
 
+  /** draw this cell on the canvas */
+  draw() {
+    const ctx = life.ctx;
+    const coordX = this.coordinates.x * life.CELL_WIDTH;
+    const coordY = this.coordinates.y * life.CELL_HEIGHT;
+
+    if (this.active) {
+      ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+    } else {
+      ctx.strokeRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+    }
+
+    if (this.hover) {
+      ctx.fillStyle = 'rgba(252, 186, 3, 0.25)';
+      ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+      ctx.fillStyle = 'rgb(0, 0, 0)';
+    }
+  }
+
 }
 
 
@@ -97,20 +116,7 @@ life.drawBoard = () => {
   // draw each cell
   life.board.forEach(row => {
     row.forEach(cell => {
-      const coordX = cell.coordinates.x * life.CELL_WIDTH;
-      const coordY = cell.coordinates.y * life.CELL_HEIGHT;
-
-      if (cell.active) {
-        ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
-      } else {
-        ctx.strokeRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
-      }
-
-      if (cell.hover) {
-        ctx.fillStyle = 'rgba(252, 186, 3, 0.25)';
-        ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
-        ctx.fillStyle = 'rgb(0, 0, 0)';
-      }
+      cell.draw();
     })
   })
 }
