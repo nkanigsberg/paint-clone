@@ -4,6 +4,11 @@ class Cell {
     this.coordinates = coordinates;
     this.active = active;
   }
+
+  toggleActive() {
+    this.active = !this.active;
+    life.drawBoard();
+  }
 }
 
 
@@ -45,16 +50,42 @@ life.initializeBoard = () => {
 /** Draw the board on the canvas */
 life.drawBoard = () => {
   const ctx = life.ctx;
+
+  // clear canvas before each draw
+  ctx.clearRect(0, 0, life.canvas.width, life.canvas.height);
+
+  // draw each cell
   life.board.forEach(row => {
     row.forEach(cell => {
-      ctx.strokeRect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
-      // ctx.beginPath();
-      // ctx.rect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
-      // ctx.fillStyle = "#0000FF";
-      // ctx.fill();
-      // ctx.closePath();
+      if (cell.active) {
+        ctx.fillRect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
+      } else {
+        ctx.strokeRect(cell.coordinates.x, cell.coordinates.y, life.CELL_WIDTH, life.CELL_HEIGHT);
+      }
     })
   })
+}
+
+// /** add hover effect when cursor over a cell */
+// life.mouseMoveHandler = e => {
+//   const relativeX = e.clientX - life.canvas.offsetLeft;
+//   if (relativeX > 0 && relativeX < life.canvas.width) {
+//     life.ctx.fillRect(relativeX, 25, life.CELL_WIDTH, life.CELL_HEIGHT);
+//   }
+// }
+
+/** toggle whether cell is active on click */
+life.mouseDownHandler = e => {
+  // only trigger if clicking on canvas
+  if (e.target === life.canvas) {
+    // get cell position from click
+    const cellX = Math.floor((e.clientX - life.canvas.offsetLeft) / life.CELL_WIDTH);
+    const cellY = Math.floor((e.clientY - life.canvas.offsetTop) / life.CELL_HEIGHT);
+    console.log('x:', cellX, 'y:', cellY);
+
+    // toggle cell active
+    life.board[cellY][cellX].toggleActive();
+  }
 }
 
 /** Initialize the game */
@@ -62,29 +93,13 @@ life.init = () => {
   // set html canvas dimensions
   life.canvas.setAttribute('width', life.BOARD_WIDTH);
   life.canvas.setAttribute('height', life.BOARD_HEIGHT);
-  
+
+  // initialize and draw the board
   life.initializeBoard();
 
-  // ctx.fillStyle = "#FF0000";
-  // ctx.fillRect(0, 0, 150, 100);
-
-  // ctx.beginPath();
-  // ctx.rect(20, 40, 50, 50);
-  // ctx.fillStyle = "#0000FF";
-  // ctx.fill();
-  // ctx.closePath();
-
-  // ctx.beginPath();
-  // ctx.arc(240, 160, 20, 0, Math.PI * 2, false);
-  // ctx.fillStyle = "green";
-  // ctx.fill();
-  // ctx.closePath();
-
-  // ctx.beginPath();
-  // ctx.rect(160, 10, 100, 40);
-  // ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
-  // ctx.stroke();
-  // ctx.closePath();
+  // mouse listeners
+  // document.addEventListener("mousemove", life.mouseMoveHandler, false);
+  document.addEventListener("mousedown", life.mouseDownHandler, false);
 
 }
 
