@@ -8,8 +8,8 @@ class Cell {
   }
 
   styles = {
-    empty: 'rgb(0, 0, 0)',
-    active: 'rgb(255, 255, 255)',
+    default: '#FFFFFF',
+    active: '#000000',
   }
 
   /** Toggle whether or not this cell is active */
@@ -41,9 +41,11 @@ class Cell {
     const coordY = this.coordinates.y * life.CELL_HEIGHT;
 
     if (this.active) {
+      ctx.fillStyle = this.styles.active;
       ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
     } else {
-      ctx.strokeRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
+      ctx.fillStyle = this.styles.default;
+      ctx.fillRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
     }
   }
 
@@ -66,8 +68,8 @@ class Cell {
 const life = {};
 
 // constants
-life.CELL_WIDTH = 20;
-life.CELL_HEIGHT = 20;
+life.CELL_WIDTH = 2;
+life.CELL_HEIGHT = 2;
 life.BOARD_WIDTH = 800;
 life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
