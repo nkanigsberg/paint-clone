@@ -114,9 +114,13 @@ life.canvas = document.getElementById("lifeCanvas");
 life.ctx = life.canvas.getContext("2d");
 
 life.clearBtn = document.getElementById("clear");
+life.playBtn = document.getElementById("play");
 
 /** The 2D array representation of the game board */
 life.board = [];
+
+/** True if simulation is playing, false by default */
+life.play = false;
 
 /** The previously hovered cell (so can disable hover) */
 life.previousHover = {};
@@ -229,6 +233,8 @@ life.mouseUpHandler = e => {
 life.mouseLeaveHandler = () => {
   const prevHoverCoords = life.previousHover.coordinates;
   life.board[prevHoverCoords.y][prevHoverCoords.x].disableHover();
+
+  life.canvas.removeEventListener('mousemove', life.mouseDragHandler);
 }
 
 /** clear board and canvas on click */
@@ -243,6 +249,15 @@ life.clearBtnClickHandler = () => {
   life.drawBoard();
 }
 
+/** Toggle play/pause on simulation */
+life.playBtnClickHandler = () => {
+  // toggle play/pause
+  life.play = !life.play;
+
+  // set button text
+  life.playBtn.innerText = life.play ? 'Pause' : 'Play';
+  console.log('Playing:', life.play);
+}
 
 
 // ==================== Initialize =================== //
@@ -261,6 +276,7 @@ life.init = () => {
 
   // button listeners
   life.clearBtn.addEventListener("click", life.clearBtnClickHandler);
+  life.playBtn.addEventListener("click", life.playBtnClickHandler);
 
 }
 
