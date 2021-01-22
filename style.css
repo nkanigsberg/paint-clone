@@ -46,50 +46,8 @@ h1 {
 canvas {
   border: 2px solid white;
   display: block;
-}
-
-canvas,
-.controls,
-.rules {
-  width: 800px;
+    width: 800px;
   margin: 0 auto;
-}
-
-.controls {
-  display: flex;
-  justify-content: space-between;
-}
-
-.controls .left,
-.controls .right {
-  display: flex;
-  padding: 5px;
-}
-
-.controls .left {
-  flex-direction: column;
-}
-
-.controls .left div {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.controls .right {
-  align-items: flex-start;
-}
-
-.controls #variant,
-.controls #speed {
-  margin: 0 5px;
-}
-
-.controls button {
-  margin: 0 5px;
-}
-
-.rules {
-  margin-top: 50px;
 }
 
 footer {
