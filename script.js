@@ -1,7 +1,3 @@
-// TODO
-  // add play mode (vs. placement mode)
-   // toggle button
-
 // ========================== Cell ======================== //
 
 /** Class representing a Cell */
@@ -110,11 +106,13 @@ life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
 
+// html elements
 life.canvas = document.getElementById("lifeCanvas");
 life.ctx = life.canvas.getContext("2d");
 
 life.clearBtn = document.getElementById("clear");
 life.playBtn = document.getElementById("play");
+life.playMessage = document.getElementById("playMessage");
 
 /** The 2D array representation of the game board */
 life.board = [];
@@ -254,9 +252,11 @@ life.playBtnClickHandler = () => {
   // toggle play/pause
   life.play = !life.play;
 
-  // set button text
+  // set button & message text
   life.playBtn.innerText = life.play ? 'Pause' : 'Play';
-  console.log('Playing:', life.play);
+  life.playMessage.innerText = life.play ? 'Playing' : 'Paused';
+
+  // TODO simulate!
 }
 
 
