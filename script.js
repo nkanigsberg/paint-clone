@@ -5,8 +5,9 @@
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, active = false, hover = false) {
+  constructor(coordinates, neighbours = 0, active = false, hover = false) {
     this.coordinates = coordinates;
+    this.neighbours = neighbours;
     this.active = active;
     this.hover = hover;
   }
@@ -93,7 +94,12 @@ class Cell {
 
   /** simulate life for this cell */
   simulate() {
-
+    if (this.active && (this.neighbours <= 1 || this.neighbours >= 4)) {
+      this.active = false;
+    } else if (!this.active && this.neighbours === 3) {
+      this.active = true;
+    }
+    this.draw();
   }
 
   /** Returns the number of neighbours this cell has */
@@ -113,7 +119,7 @@ class Cell {
         }
       }
     }
-    console.log(`x: ${cellX}, y: ${cellY}, neighbours: ${result}`);
+    // console.log(`x: ${cellX}, y: ${cellY}, neighbours: ${result}`);
     return result;
   }
 
@@ -130,11 +136,11 @@ const life = {};
 // constants
 life.CELL_WIDTH = 20;
 life.CELL_HEIGHT = 20;
-life.BOARD_WIDTH = 100;
-life.BOARD_HEIGHT = 100;
+life.BOARD_WIDTH = 800;
+life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
-life.TURN_TIMER = 2000;
+life.TURN_TIMER = 500;
 
 // html elements
 life.canvas = document.getElementById("lifeCanvas");
@@ -296,11 +302,23 @@ life.playBtnClickHandler = () => {
   }
 }
 
-/** simulate one turn */
+/** 
+ * Simulate one turn
+ * - Two loops - otherwise will be counting updated neighbours mid-loop
+ *  - one for counting up neighbours
+ *  - two for updating positions
+ * */
 life.simulate = () => {
+  // Count neighbours for all cells
   life.board.forEach(row => {
     row.forEach(cell => {
-      console.log(cell.numNeighbours());
+      cell.neighbours = cell.numNeighbours();
+    })
+  })
+  // update cells based on counted neighbours
+  life.board.forEach(row => {
+    row.forEach(cell => {
+      cell.simulate();
     })
   })
 }
