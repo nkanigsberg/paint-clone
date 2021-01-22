@@ -60,11 +60,26 @@ canvas,
   justify-content: space-between;
 }
 
-.controls div {
+.controls .left,
+.controls .right {
   display: flex;
   padding: 5px;
 }
 
+.controls .left {
+  flex-direction: column;
+}
+
+.controls .left div {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.controls .right {
+  align-items: flex-start;
+}
+
+.controls #variant,
 .controls #speed {
   margin: 0 5px;
 }

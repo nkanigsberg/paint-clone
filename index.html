@@ -24,13 +24,23 @@
       <canvas id="lifeCanvas"></canvas>
     
       <div class="controls">
-        <div>
-          <span id="playMessage">Paused</span>
-          <button id="play" type="button" title="Play/Pause"><i class="fas fa-play"></i></button>
-          <button id="clear" type="button" title="Clear"><i class="fas fa-trash"></i></button>
+        <div class="left">
+          <div>
+            <span id="playMessage">Paused</span>
+            <button id="play" type="button" title="Play/Pause"><i class="fas fa-play"></i></button>
+            <button id="clear" type="button" title="Clear"><i class="fas fa-trash"></i></button>
+          </div>
+          
+          <div>
+            <label for="variant">Variant:</label>
+            <select id="variant">
+              <option value="standard">Standard</option>
+              <option value="highLife">High Life</option>
+            </select>
+          </div>
         </div>
     
-        <div>
+        <div class="right">
           <label for="speed">Speed:</label>
           <input id="speed" type="range" min="10" max="1000" step="10">
           <span id="speedMessage">500ms</span>
@@ -38,7 +48,8 @@
       </div>
     
       <div class="rules">
-        <h3>Rules</h3>
+        <h2>Rules</h2>
+        <h3>Standard</h3>
         <h4>For a space that is populated</h4>
         <ul>
           <li>Each cell with one or no neighbours dies, as if by solitude</li>
@@ -49,7 +60,12 @@
         <h4>For a space that is empty or unpopulated</h4>
         <ul>
           <li>Each cell with three neighbours becomes populated</li>
-          <li>Each cell with six neighbours becomes populated (custom rule for more activity)</li>
+        </ul>
+
+        <h3>High Life</h3>
+        <ul>
+          <li>Same as standard, plus:</li>
+          <li>Each cell with six neighbours becomes populated - this allows for more complex, and <a href="https://www.conwaylife.com/wiki/Replicator">self-replicating</a> patterns</li>
         </ul>
     
         <p>Based on <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a></p>

@@ -2,6 +2,7 @@
   // possible to not check EVERY cell on play?
   // grid/cell size options
   // option to reset to seed - so people won't lose what they started with
+  // variant select - different rulesets
 
 // ========================== Cell ======================== //
 
@@ -94,12 +95,23 @@ class Cell {
     ctx.clearRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
   }
 
-  /** simulate life for this cell */
+  /** simulate life for this cell depending on active ruleset */
   simulate() {
-    if (this.active && (this.neighbours <= 1 || this.neighbours >= 4)) {
-      this.active = false;
-    } else if (!this.active && (this.neighbours === 3 || this.neighbours === 6)) {
-      this.active = true;
+    switch (life.ruleVariant) {
+      case 'standard':
+        if (this.active && (this.neighbours <= 1 || this.neighbours >= 4)) {
+          this.active = false;
+        } else if (!this.active && this.neighbours === 3) {
+          this.active = true;
+        }
+        break;
+      case 'highLife':
+        if (this.active && (this.neighbours <= 1 || this.neighbours >= 4)) {
+          this.active = false;
+        } else if (!this.active && (this.neighbours === 3 || this.neighbours === 6)) {
+          this.active = true;
+        }
+        break;
     }
     this.draw();
   }
@@ -154,6 +166,8 @@ life.playMessage = document.getElementById("playMessage");
 life.speedSlider = document.getElementById("speed");
 life.speedMessage = document.getElementById("speedMessage");
 
+life.variantSelect = document.getElementById("variant");
+
 /** The 2D array representation of the game board */
 life.board = [];
 
@@ -171,6 +185,10 @@ life.dragType = 'active';
 
 /** True if mouse has been dragged */
 life.mouseDrag = false;
+
+/** The active ruleset selected by the user ('standard' by default) */
+life.ruleVariant = 'standard';
+
 
 /** Create 2D array and draw the board */
 life.initializeBoard = () => {
@@ -352,6 +370,14 @@ life.speedSliderMoveHandler = e => {
   }
 }
 
+/** Change the rule variant on select */
+life.variantSelectChangeHandler = e => {
+  life.ruleVariant = e.target.value;
+}
+
+
+
+
 // ==================== Initialize =================== //
 life.init = () => {
   // set html canvas dimensions
@@ -373,6 +399,9 @@ life.init = () => {
   // speed slider listeners
   life.speedSlider.addEventListener("mousemove", life.speedSliderMoveHandler);
   life.setSpeed(); // initially set speed in case slider is not in default position
+
+  // variant select listener
+  life.variantSelect.addEventListener("change", life.variantSelectChangeHandler);
 }
 
 
