@@ -1,7 +1,7 @@
 // TODO
   // possible to not check EVERY cell on play?
-  // Time slider
   // grid/cell size options
+  // option to reset to seed - so people won't lose what they started with
 
 // ========================== Cell ======================== //
 
@@ -333,7 +333,7 @@ life.playBtnClickHandler = () => {
   life.play = !life.play;
 
   // set button & message text
-  life.playBtn.innerText = life.play ? 'Pause' : 'Play';
+  life.playBtn.innerHTML = life.play ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
   life.playMessage.innerText = life.play ? 'Playing' : 'Paused';
 
   // start simulation on play, stop on pause

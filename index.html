@@ -4,22 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game of Life Test</title>
+  <!-- FontAwesome -->
+  <script src="https://kit.fontawesome.com/51d17a3aa7.js" crossorigin="anonymous"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Game of Life - Demo</h1>
+  <header>
+    <div class="wrapper">
+      <h1>Game of Life - Demo</h1>
+    </div>
+  </header>
 
-  <canvas id="lifeCanvas"></canvas>
-
-  <div class="controls">
-    <span id="playMessage">Paused</span>
-    <button id="play" type="button">Play</button>
-    <button id="clear" type="button">Clear</button>
-
-    <label for="speed">Speed:</label>
-    <input id="speed" type="range"  min="10" max="1000" step="10">
-    <span id="speedMessage">500ms</span>
-  </div>
+  <main>
+    <div class="wrapper">
+      <canvas id="lifeCanvas"></canvas>
+    
+      <div class="controls">
+        <div>
+          <span id="playMessage">Paused</span>
+          <button id="play" type="button" title="Play/Pause"><i class="fas fa-play"></i></button>
+          <button id="clear" type="button" title="Clear"><i class="fas fa-trash"></i></button>
+        </div>
+    
+        <div>
+          <label for="speed">Speed:</label>
+          <input id="speed" type="range" min="10" max="1000" step="10">
+          <span id="speedMessage">500ms</span>
+        </div>
+      </div>
+    
+      <div class="rules">
+        <h3>Rules</h3>
+        <h4>For a space that is populated:</h4>
+        <ul>
+          <li>Each cell with one or no neighbours dies, as if by solitude.</li>
+          <li>Each cell with four or more neighbours dies, as if by overpopulation.</li>
+          <li>Each cell with two or three neighbours survives.</li>
+        </ul>
+    
+        <h4>For a space that is empty or unpopulated</h4>
+        <ul>
+          <li>Each cell with three neighbours becomes populated.</li>
+          <li>Each cell with six neighbours becomes populated.</li>
+        </ul>
+    
+        <p>Based on <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a></p>
+      </div>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="wrapper">
+      <p>Built by <a href="https://github.com/nkanigsberg">Nathan Kanigsberg</a> - <a href="https://kanigsberg.dev/">Portfolio</a></p>
+    </div>
+  </footer>
 
   <script src="./script.js"></script>
 </body>
