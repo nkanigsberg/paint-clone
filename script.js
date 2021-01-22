@@ -1,5 +1,7 @@
 // TODO
   // possible to not check EVERY cell on play?
+  // Time slider
+  // grid/cell size options
 
 // ========================== Cell ======================== //
 
@@ -119,7 +121,6 @@ class Cell {
         }
       }
     }
-    // console.log(`x: ${cellX}, y: ${cellY}, neighbours: ${result}`);
     return result;
   }
 
@@ -140,18 +141,24 @@ life.BOARD_WIDTH = 800;
 life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
-life.TURN_TIMER = 500;
 
 // html elements
 life.canvas = document.getElementById("lifeCanvas");
 life.ctx = life.canvas.getContext("2d");
 
 life.clearBtn = document.getElementById("clear");
+
 life.playBtn = document.getElementById("play");
 life.playMessage = document.getElementById("playMessage");
 
+life.speedSlider = document.getElementById("speed");
+life.speedMessage = document.getElementById("speedMessage");
+
 /** The 2D array representation of the game board */
 life.board = [];
+
+/** The turn timer, in ms */
+life.turnTimer = 500;
 
 /** True if simulation is playing, false by default */
 life.play = false;
@@ -173,7 +180,6 @@ life.initializeBoard = () => {
       life.board[y].push(new Cell({ y, x }));
     }
   }
-  // console.log(life.board);
 
   life.drawBoard();
 }
@@ -196,7 +202,45 @@ life.clearBoard = () => {
   life.ctx.clearRect(0, 0, life.canvas.width, life.canvas.height);
 }
 
+/** 
+ * Simulate one turn
+ * - Two loops - otherwise will be counting updated neighbours mid-loop
+ *  - one for counting up neighbours
+ *  - two for updating positions
+ * */
+life.simulate = () => {
+  // Count neighbours for all cells
+  life.board.forEach(row => {
+    row.forEach(cell => {
+      cell.neighbours = cell.numNeighbours();
+    })
+  })
+  // update cells based on counted neighbours
+  life.board.forEach(row => {
+    row.forEach(cell => {
+      cell.simulate();
+    })
+  })
+}
 
+/** Set the text for speed message */
+life.setSpeed = () => {
+  const speed = life.speedSlider.valueAsNumber;
+  life.turnTimer = speed;
+  life.speedMessage.innerText = `${speed}ms`;
+}
+
+/** Start the game timer */
+life.startTimer = () => {
+  life.interval = setInterval(() => {
+    life.simulate();
+  }, life.turnTimer);
+}
+
+/** Stop the game timer */
+life.stopTimer = () => {
+  clearInterval(life.interval);
+}
 
 
 // ==================== Event Handlers ====================== //
@@ -293,36 +337,20 @@ life.playBtnClickHandler = () => {
   life.playMessage.innerText = life.play ? 'Playing' : 'Paused';
 
   // start simulation on play, stop on pause
+  if (life.play) life.startTimer();
+  else clearInterval(life.interval);
+}
+
+/** Set simulation speed and slider text on move */
+life.speedSliderMoveHandler = e => {
+  life.setSpeed();
+
+  // if game is playing, restart the timer
   if (life.play) {
-    life.interval = setInterval(() => {
-      life.simulate();
-    }, life.TURN_TIMER);
-  } else {
-    clearInterval(life.interval);
+    life.stopTimer();
+    life.startTimer();
   }
 }
-
-/** 
- * Simulate one turn
- * - Two loops - otherwise will be counting updated neighbours mid-loop
- *  - one for counting up neighbours
- *  - two for updating positions
- * */
-life.simulate = () => {
-  // Count neighbours for all cells
-  life.board.forEach(row => {
-    row.forEach(cell => {
-      cell.neighbours = cell.numNeighbours();
-    })
-  })
-  // update cells based on counted neighbours
-  life.board.forEach(row => {
-    row.forEach(cell => {
-      cell.simulate();
-    })
-  })
-}
-
 
 // ==================== Initialize =================== //
 life.init = () => {
@@ -342,6 +370,9 @@ life.init = () => {
   life.clearBtn.addEventListener("click", life.clearBtnClickHandler);
   life.playBtn.addEventListener("click", life.playBtnClickHandler);
 
+  // speed slider listeners
+  life.speedSlider.addEventListener("mousemove", life.speedSliderMoveHandler);
+  life.setSpeed(); // initially set speed in case slider is not in default position
 }
 
 
