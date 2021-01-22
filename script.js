@@ -93,7 +93,7 @@ class Cell {
 
   /** simulate life for this cell */
   simulate() {
-    
+
   }
 
   /** Returns the number of neighbours this cell has */
@@ -102,18 +102,18 @@ class Cell {
     let result = 0;
 
     // loop through surrounding x and y coordinates and count active cells
-    for (let y = cellY-1; y <= cellY+1; y++) {
+    for (let y = cellY - 1; y <= cellY + 1; y++) {
       // if inside vertical boundaries
       if (y >= 0 && y < life.NUM_ROWS) {
-        for (let x = cellX-1; x <= cellX+1; x++) {
+        for (let x = cellX - 1; x <= cellX + 1; x++) {
           // if inside horizontal boundaries, and not the central cell
-          if (x >= 0 && x < life.NUM_COLUMNS && (y !== 0 && x !== 0)) {
+          if (x >= 0 && x < life.NUM_COLUMNS && (y !== cellY || x !== cellX)) {
             if (life.board[y][x].active) result++;
           }
         }
       }
     }
-    console.log(result);
+    console.log(`x: ${cellX}, y: ${cellY}, neighbours: ${result}`);
     return result;
   }
 
@@ -130,8 +130,8 @@ const life = {};
 // constants
 life.CELL_WIDTH = 20;
 life.CELL_HEIGHT = 20;
-life.BOARD_WIDTH = 800;
-life.BOARD_HEIGHT = 600;
+life.BOARD_WIDTH = 100;
+life.BOARD_HEIGHT = 100;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
 life.TURN_TIMER = 2000;
@@ -286,7 +286,23 @@ life.playBtnClickHandler = () => {
   life.playBtn.innerText = life.play ? 'Pause' : 'Play';
   life.playMessage.innerText = life.play ? 'Playing' : 'Paused';
 
-  // TODO simulate!
+  // start simulation on play, stop on pause
+  if (life.play) {
+    life.interval = setInterval(() => {
+      life.simulate();
+    }, life.TURN_TIMER);
+  } else {
+    clearInterval(life.interval);
+  }
+}
+
+/** simulate one turn */
+life.simulate = () => {
+  life.board.forEach(row => {
+    row.forEach(cell => {
+      console.log(cell.numNeighbours());
+    })
+  })
 }
 
 
