@@ -98,7 +98,7 @@ class Cell {
   simulate() {
     if (this.active && (this.neighbours <= 1 || this.neighbours >= 4)) {
       this.active = false;
-    } else if (!this.active && this.neighbours === 3) {
+    } else if (!this.active && (this.neighbours === 3 || this.neighbours === 6)) {
       this.active = true;
     }
     this.draw();
