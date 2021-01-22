@@ -1,3 +1,6 @@
+// TODO
+  // possible to not check EVERY cell on play?
+
 // ========================== Cell ======================== //
 
 /** Class representing a Cell */
@@ -40,9 +43,8 @@ class Cell {
       
       // if another cell is currently hovered - disable its hover
       if (life.previousHover.coordinates) {
-        const prevCoords = life.previousHover.coordinates;
-
-        life.board[prevCoords.y][prevCoords.x].disableHover();
+        const { y, x } = life.previousHover.coordinates;
+        life.board[y][x].disableHover();
       }
 
       // set this cell as the previously hovered cell
@@ -88,6 +90,33 @@ class Cell {
 
     ctx.clearRect(coordX, coordY, life.CELL_WIDTH, life.CELL_HEIGHT);
   }
+
+  /** simulate life for this cell */
+  simulate() {
+    
+  }
+
+  /** Returns the number of neighbours this cell has */
+  numNeighbours() {
+    const { x: cellX, y: cellY } = this.coordinates;
+    let result = 0;
+
+    // loop through surrounding x and y coordinates and count active cells
+    for (let y = cellY-1; y <= cellY+1; y++) {
+      // if inside vertical boundaries
+      if (y >= 0 && y < life.NUM_ROWS) {
+        for (let x = cellX-1; x <= cellX+1; x++) {
+          // if inside horizontal boundaries, and not the central cell
+          if (x >= 0 && x < life.NUM_COLUMNS && (y !== 0 && x !== 0)) {
+            if (life.board[y][x].active) result++;
+          }
+        }
+      }
+    }
+    console.log(result);
+    return result;
+  }
+
 }
 
 
@@ -105,6 +134,7 @@ life.BOARD_WIDTH = 800;
 life.BOARD_HEIGHT = 600;
 life.NUM_COLUMNS = life.BOARD_WIDTH / life.CELL_WIDTH;
 life.NUM_ROWS = life.BOARD_HEIGHT / life.CELL_HEIGHT;
+life.TURN_TIMER = 2000;
 
 // html elements
 life.canvas = document.getElementById("lifeCanvas");
