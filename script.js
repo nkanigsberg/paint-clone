@@ -67,6 +67,57 @@ class Cell {
 
     ctx.clearRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
   }
+
+  /** fill this cell's neighbours that have the specified color */
+  fillNeighbours(color) {
+    console.log('fillNeighbours');
+    const { x, y } = this.coordinates;
+
+    // // loop through surrounding x and y coordinates and fill appropriate neighbours
+    // for (let y = cellY - 1; y <= cellY + 1; y++) {
+    //   // if inside vertical boundaries
+    //   if (y >= 0 && y < paint.NUM_ROWS) {
+    //     for (let x = cellX - 1; x <= cellX + 1; x++) {
+    //       // if inside horizontal boundaries, and not the central cell
+    //       if (x >= 0 && x < paint.NUM_COLUMNS && (y !== cellY || x !== cellX)) {
+    //         // if this cell has provided color
+    //         if (paint.board[y][x].color === color) {
+    //           // set this cell to new color
+    //           paint.board[y][x].color = paint.color;
+    //           // fill this cell's neighbours
+    //           paint.board[y][x].fillNeighbours(color);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
+    // this cell's neighbour coordinates
+    const neighbours = {
+      up: { x, y: y + 1 },
+      right: { x: x + 1, y },
+      down: { x, y: y - 1 },
+      left: { x: x - 1, y }
+    }
+
+    // loop through neighbours and fill if appropriate
+    for (let i in neighbours) {
+      const coords = neighbours[i];
+      console.log(coords);
+      // only if within canvas boundaries
+      if (coords.x >= 0 && coords.x < paint.NUM_COLUMNS && coords.y >= 0 && coords.y < paint.NUM_ROWS) {
+        // if this cell has provided color
+        if (paint.board[coords.y][coords.x].color === color) {
+          // set this cell to new color
+          paint.board[coords.y][coords.x].color = paint.color;
+          // redraw this cell
+          paint.board[coords.y][coords.x].setActive();
+          // fill this cell's neighbours
+          paint.board[coords.y][coords.x].fillNeighbours(color);
+        }
+      }
+    }
+  }
 }
 
 
@@ -268,9 +319,7 @@ paint.drawCircle = (x0, y0, r) => {
 /** Fill all connected cells matching color from specified coordinates */
 paint.fill = (x, y) => {
   const colorToFill = paint.board[y][x].color;
-  console.log(colorToFill);
-
-
+  paint.board[y][x].fillNeighbours(colorToFill);
 }
 
 
