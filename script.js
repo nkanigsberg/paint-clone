@@ -210,14 +210,7 @@ paint.drawLine = ( start, end ) => {
 
 
 /** toggle whether cell is active on click */
-paint.mouseDownHandler = e => {
-  // get cell position
-  const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
-  const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
-
-  // set type of cell to fill on drag depending on what is initially clicked
-  paint.dragType = paint.board[cellY][cellX].active ? 'inactive' : 'active';
-
+paint.mouseDownHandler = () => {
   // event listeners for mouse drag and mouse up
   paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
   paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
@@ -236,8 +229,7 @@ paint.mouseDragHandler = e => {
 
   // toggle cell active (only if clicking on a cell)
   if (cellY < paint.BOARD_HEIGHT / paint.CELL_HEIGHT && cellX < paint.BOARD_WIDTH / paint.CELL_WIDTH) {
-    if (paint.dragType === 'active') paint.board[cellY][cellX].setActive();
-    else paint.board[cellY][cellX].setInactive();
+    paint.board[cellY][cellX].setActive();
   
     // if distance between the last painted cell and this cell is greater than 1, fill in the gap
     if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
