@@ -1,5 +1,8 @@
 // TODO
   // brush size
+    // make it perform better!
+      // add fill functionality - then draw lines and fill them (instead of drawing a new circle at every point)
+      // keep track of previously filled cells on drag, and omit from new circles?
   // paint bucket
   // clear
   // erase
@@ -86,6 +89,10 @@ paint.ctx = paint.canvas.getContext("2d");
 paint.colorPicker = document.getElementById("colorPicker");
 paint.brushSizeSlider = document.getElementById("brushSize");
 
+// paint.pencil = document.getElementById("pencil");
+// paint.paintBucket = document.getElementById("paintBucket");
+paint.brushTypes = document.getElementById("brushTypes");
+
 /** The 2D array representation of the game board */
 paint.board = [];
 
@@ -103,6 +110,12 @@ paint.color = '#000000';
 
 /** The brush size to draw with, default is 1px */
 paint.brushSize = 1;
+
+/** 
+ * The currently active brush type, default is 'pencil'
+ * Allowed types (so far): 'pencil', 'fill'
+ */
+paint.brushType = 'pencil';
 
 
 /** Create 2D array and draw the board */
@@ -325,6 +338,11 @@ paint.brushSizeChangeHandler = e => {
   paint.brushSize = e.target.value;
 }
 
+/** Change current brush type to selected */
+paint.brushTypeChangeHandler = e => {
+  paint.brushType = e.target.value;
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
@@ -348,6 +366,8 @@ paint.init = () => {
   // brush size listener
   paint.brushSizeSlider.addEventListener("change", paint.brushSizeChangeHandler);
 
+  // paint bucket listener
+  paint.brushTypes.addEventListener("change", paint.brushTypeChangeHandler);
 
 }
 
