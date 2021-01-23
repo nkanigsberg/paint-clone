@@ -4,6 +4,7 @@
       // add fill functionality - then draw lines and fill them (instead of drawing a new circle at every point)
       // keep track of previously filled cells on drag, and omit from new circles?
   // paint bucket
+  // fix circle error at edge of canvas (undefined cells)
   // clear
   // erase
   // save
@@ -14,8 +15,9 @@
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, active = false) {
+  constructor(coordinates, color = '#FFFFFF', active = false) {
     this.coordinates = coordinates;
+    this.color = color;
     this.active = active;
   }
 
@@ -28,6 +30,7 @@ class Cell {
   /** Set this cell to active */
   setActive() {
     this.active = true;
+    this.color = paint.color;
     this.draw();
   }
 
@@ -262,16 +265,31 @@ paint.drawCircle = (x0, y0, r) => {
   }
 }
 
+/** Fill all connected cells matching color from specified coordinates */
+paint.fill = (x, y) => {
+  const colorToFill = paint.board[y][x].color;
+  console.log(colorToFill);
+}
+
 
 
 // ==================== Event Handlers ====================== //
 
 
-/** toggle whether cell is active on click */
-paint.mouseDownHandler = () => {
-  // event listeners for mouse drag and mouse up
-  paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
-  paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+/** Perform action depending on selected brush type */
+paint.mouseDownHandler = e => {
+  // Get cell coordinates
+  const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
+
+  // perform action depending on brush type
+  if (paint.brushType === 'pencil') {
+    // event listeners for mouse drag and mouse up
+    paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
+    paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+  } else if (paint.brushType === 'fill') {
+    paint.fill(cellX, cellY);
+  }
 }
 
 /** Toggle cells when clicking and dragging over them */
