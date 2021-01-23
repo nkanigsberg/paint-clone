@@ -135,6 +135,16 @@ paint.clearBoard = () => {
   paint.ctx.clearRect(0, 0, paint.canvas.width, paint.canvas.height);
 }
 
+/** draw at specified coordinates */
+paint.draw = (x, y) => {
+  // if brush size is larger than 1px, draw a circle
+  if (paint.brushSize > 1) {
+    paint.drawCircle(x, y, paint.brushSize)
+  } else{
+    paint.board[y][x].setActive();
+  }
+}
+
 
 /** 
  * Draw a line between specified coordinates
@@ -168,7 +178,7 @@ paint.drawLine = ( start, end ) => {
     } else { // Line is drawn right to left (swap ends)
       x = x2; y = y2; xe = x1;
     } 
-    paint.board[y][x].setActive(); // Draw first pixel
+    paint.draw(x, y); // Draw first pixel
     // Rasterize the line
     for (i = 0; x < xe; i++) {
       x = x + 1;
@@ -184,7 +194,7 @@ paint.drawLine = ( start, end ) => {
         px = px + 2 * (dy1 - dx1);
       }
       // Draw pixel from line span at currently rasterized position
-      paint.board[y][x].setActive();
+      paint.draw(x, y);
     }
   } else { // The line is Y-axis dominant
     // Line is drawn bottom to top
@@ -192,7 +202,7 @@ paint.drawLine = ( start, end ) => {
       x = x1; y = y1; ye = y2;
     } else { // Line is drawn top to bottom
       x = x2; y = y2; ye = y1;
-    } paint.board[y][x].setActive(); // Draw first pixel
+    } paint.draw(x, y); // Draw first pixel
     // Rasterize the line
     for (i = 0; y < ye; i++) {
       y = y + 1;
@@ -208,7 +218,7 @@ paint.drawLine = ( start, end ) => {
         py = py + 2 * (dx1 - dy1);
       }
       // Draw pixel from line span at currently rasterized position
-      paint.board[y][x].setActive();
+      paint.draw(x, y);
     }
   }
 }
@@ -264,7 +274,7 @@ paint.mouseDragHandler = e => {
 
   // toggle cell active (only if clicking on a cell)
   if (cellY < paint.BOARD_HEIGHT / paint.CELL_HEIGHT && cellX < paint.BOARD_WIDTH / paint.CELL_WIDTH) {
-    paint.board[cellY][cellX].setActive();
+    paint.draw(cellX, cellY)
   
     // if distance between the last painted cell and this cell is greater than 1, fill in the gap
     if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
@@ -287,7 +297,7 @@ paint.mouseUpHandler = e => {
 
     // toggle cell active (only if clicking on a cell)
     if (cellY < paint.BOARD_HEIGHT / paint.CELL_HEIGHT && cellX < paint.BOARD_WIDTH / paint.CELL_WIDTH)
-      paint.board[cellY][cellX].toggleActive();
+      paint.draw(cellX, cellY);
   }
 
   // set mouse drag back to false
@@ -312,7 +322,7 @@ paint.colorPickerChangeHandler = e => {
 
 /** Change the brush size on slider change */
 paint.brushSizeChangeHandler = e => {
-  console.log(e.target.value);
+  paint.brushSize = e.target.value;
 }
 
 
