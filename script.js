@@ -1,5 +1,6 @@
 // TODO
   // connect the dots
+  // redo logic, draw lines manually (to keep track of active cells - allow for paint bucket logic, also cleaner lines - no blurry / antialiasing to worry about)
 
 // ========================== Cell ======================== //
 
@@ -39,8 +40,8 @@ class Cell {
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
     if (this.active) {
-      // ctx.fillStyle = paint.color;
-      // ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
+      ctx.fillStyle = paint.color;
+      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     } else {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
@@ -126,6 +127,83 @@ paint.clearBoard = () => {
 }
 
 
+/** 
+ * Draw a line between specified coordinates
+ * - Uses Bresenham’s Algorithm
+ * - From tutorial: https://jstutorial.medium.com/how-to-code-your-first-algorithm-draw-a-line-ca121f9a1395
+ */
+paint.drawLine = ( start, end ) => {
+  const { x: x1, y: y1 } = start;
+  const { x: x2, y: y2 } = end;
+
+  // Iterators, counters required by algorithm
+  let x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+
+  // Calculate deltas of line (difference between two points)
+  dx = x2 - x1;
+  dy = y2 - y1;
+
+  // Create a positive copy of deltas (makes iterating easier)
+  dx1 = Math.abs(dx);
+  dy1 = Math.abs(dy);
+
+  // Calculate error intervals for both axis
+  px = 2 * dy1 - dx1;
+  py = 2 * dx1 - dy1;
+
+  // The line is X-axis dominant
+  if (dy1 <= dx1) {
+    // Line is drawn left to right
+    if (dx >= 0) {
+      x = x1; y = y1; xe = x2;
+    } else { // Line is drawn right to left (swap ends)
+      x = x2; y = y2; xe = x1;
+    } 
+    paint.board[y][x].setActive(); // Draw first pixel
+    // Rasterize the line
+    for (i = 0; x < xe; i++) {
+      x = x + 1;
+      // Deal with octants...
+      if (px < 0) {
+        px = px + 2 * dy1;
+      } else {
+        if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+          y = y + 1;
+        } else {
+          y = y - 1;
+        }
+        px = px + 2 * (dy1 - dx1);
+      }
+      // Draw pixel from line span at currently rasterized position
+      paint.board[y][x].setActive();
+    }
+  } else { // The line is Y-axis dominant
+    // Line is drawn bottom to top
+    if (dy >= 0) {
+      x = x1; y = y1; ye = y2;
+    } else { // Line is drawn top to bottom
+      x = x2; y = y2; ye = y1;
+    } paint.board[y][x].setActive(); // Draw first pixel
+    // Rasterize the line
+    for (i = 0; y < ye; i++) {
+      y = y + 1;
+      // Deal with octants...
+      if (py <= 0) {
+        py = py + 2 * dx1;
+      } else {
+        if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+          x = x + 1;
+        } else {
+          x = x - 1;
+        }
+        py = py + 2 * (dx1 - dy1);
+      }
+      // Draw pixel from line span at currently rasterized position
+      paint.board[y][x].setActive();
+    }
+  }
+}
+
 
 
 // ==================== Event Handlers ====================== //
@@ -162,15 +240,8 @@ paint.mouseDragHandler = e => {
     else paint.board[cellY][cellX].setInactive();
   
     // if distance between the last painted cell and this cell is greater than 1, fill in the gap
-    // if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
-    if (paint.lastDraggedCell) {
-      const ctx = paint.ctx;
-      ctx.beginPath();
-      // note: need to offset coordinates by + 0.5 to avoid blurry lines (weirdness with how the API calculates things)
-      ctx.moveTo(posX + 0.5, posY + 0.5);
-      ctx.lineTo(paint.lastDraggedCell.coordinates.x + 0.5, paint.lastDraggedCell.coordinates.y + 0.5);
-      ctx.strokeStyle = paint.color;
-      ctx.stroke();
+    if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
+      paint.drawLine({ x: cellX, y: cellY }, { x: paint.lastDraggedCell.coordinates.x, y: paint.lastDraggedCell.coordinates.y });
     }
     paint.lastDraggedCell = paint.board[cellY][cellX];
   }
@@ -231,6 +302,7 @@ paint.init = () => {
   paint.colorPicker.addEventListener("change", paint.colorPickerChangeHandler);
   // set default color
   paint.color = paint.colorPicker.value;
+
 }
 
 
