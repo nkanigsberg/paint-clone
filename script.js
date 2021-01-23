@@ -166,8 +166,8 @@ paint.mouseDragHandler = e => {
       // console.log('fill in the gap');
       const ctx = paint.ctx;
       ctx.beginPath();
-      ctx.moveTo(posX, posY);
-      ctx.lineTo(paint.lastDraggedCell.coordinates.x, paint.lastDraggedCell.coordinates.y);
+      ctx.moveTo(posX + 0.5, posY + 0.5);
+      ctx.lineTo(paint.lastDraggedCell.coordinates.x + 0.5, paint.lastDraggedCell.coordinates.y + 0.5);
       ctx.stroke();
     }
     paint.lastDraggedCell = paint.board[cellY][cellX];
