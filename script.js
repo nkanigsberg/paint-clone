@@ -10,11 +10,6 @@ class Cell {
     this.active = active;
   }
 
-  styles = {
-    default: '#FFFFFF',
-    active: '#000000',
-  }
-
   /** Toggle whether or not this cell is active */
   toggleActive() {
     this.active = !this.active;
@@ -44,10 +39,10 @@ class Cell {
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
     if (this.active) {
-      ctx.fillStyle = this.styles.active;
+      ctx.fillStyle = paint.color;
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     } else {
-      ctx.fillStyle = this.styles.default;
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     }
   }
@@ -82,6 +77,8 @@ paint.NUM_ROWS = paint.BOARD_HEIGHT / paint.CELL_HEIGHT;
 paint.canvas = document.getElementById("paintCanvas");
 paint.ctx = paint.canvas.getContext("2d");
 
+paint.colorPicker = document.getElementById("colorPicker");
+
 /** The 2D array representation of the game board */
 paint.board = [];
 
@@ -93,6 +90,9 @@ paint.mouseDrag = false;
 
 /** The last cell activated during click and drag (used to connect the dots at high speed) */
 paint.lastDraggedCell = null;
+
+/** The currently active color */
+paint.color = '#000000';
 
 
 /** Create 2D array and draw the board */
@@ -168,6 +168,7 @@ paint.mouseDragHandler = e => {
       ctx.beginPath();
       ctx.moveTo(posX + 0.5, posY + 0.5);
       ctx.lineTo(paint.lastDraggedCell.coordinates.x + 0.5, paint.lastDraggedCell.coordinates.y + 0.5);
+      ctx.strokeStyle = paint.color;
       ctx.stroke();
     }
     paint.lastDraggedCell = paint.board[cellY][cellX];
@@ -205,6 +206,11 @@ paint.mouseLeaveHandler = () => {
   paint.lastDraggedCell = null;
 }
 
+/** Set new color on color picker change */
+paint.colorPickerChangeHandler = e => {
+  paint.color = e.target.value;
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
@@ -219,6 +225,9 @@ paint.init = () => {
   paint.canvas.addEventListener("mousemove", paint.mouseMoveHandler);
   paint.canvas.addEventListener("mousedown", paint.mouseDownHandler);
   paint.canvas.addEventListener("mouseleave", paint.mouseLeaveHandler);
+
+  // color picker listener
+  paint.colorPicker.addEventListener("change", paint.colorPickerChangeHandler);
 }
 
 
