@@ -39,8 +39,8 @@ class Cell {
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
     if (this.active) {
-      ctx.fillStyle = paint.color;
-      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
+      // ctx.fillStyle = paint.color;
+      // ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     } else {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
@@ -162,10 +162,11 @@ paint.mouseDragHandler = e => {
     else paint.board[cellY][cellX].setInactive();
   
     // if distance between the last painted cell and this cell is greater than 1, fill in the gap
-    if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
-      // console.log('fill in the gap');
+    // if (paint.lastDraggedCell && (Math.abs(paint.lastDraggedCell.coordinates.x - cellX) > 1 || Math.abs(paint.lastDraggedCell.coordinates.y - cellY) > 1)) {
+    if (paint.lastDraggedCell) {
       const ctx = paint.ctx;
       ctx.beginPath();
+      // note: need to offset coordinates by + 0.5 to avoid blurry lines (weirdness with how the API calculates things)
       ctx.moveTo(posX + 0.5, posY + 0.5);
       ctx.lineTo(paint.lastDraggedCell.coordinates.x + 0.5, paint.lastDraggedCell.coordinates.y + 0.5);
       ctx.strokeStyle = paint.color;
@@ -228,6 +229,8 @@ paint.init = () => {
 
   // color picker listener
   paint.colorPicker.addEventListener("change", paint.colorPickerChangeHandler);
+  // set default color
+  paint.color = paint.colorPicker.value;
 }
 
 
