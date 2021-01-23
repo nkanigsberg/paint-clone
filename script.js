@@ -1,6 +1,11 @@
 // TODO
-  // connect the dots
-  // redo logic, draw lines manually (to keep track of active cells - allow for paint bucket logic, also cleaner lines - no blurry / antialiasing to worry about)
+  // brush size
+  // paint bucket
+  // clear
+  // erase
+  // save
+    // cloud?
+    // download
 
 // ========================== Cell ======================== //
 
@@ -79,6 +84,7 @@ paint.canvas = document.getElementById("paintCanvas");
 paint.ctx = paint.canvas.getContext("2d");
 
 paint.colorPicker = document.getElementById("colorPicker");
+paint.brushSizeSlider = document.getElementById("brushSize");
 
 /** The 2D array representation of the game board */
 paint.board = [];
@@ -94,6 +100,9 @@ paint.lastDraggedCell = null;
 
 /** The currently active color */
 paint.color = '#000000';
+
+/** The brush size to draw with, default is 1px */
+paint.brushSize = 1;
 
 
 /** Create 2D array and draw the board */
@@ -204,6 +213,32 @@ paint.drawLine = ( start, end ) => {
   }
 }
 
+/** 
+ * Draw a circle at specified coordinates
+ * - Uses algorithm found here: https://www.geeksforgeeks.org/draw-circle-without-floating-point-arithmetic/
+ *  */
+paint.drawCircle = (x0, y0, r) => {
+  // Consider a rectangle of size N*N 
+  const N = 2 * r + 1;
+
+  // Coordinates inside the rectangle 
+  let x, y;
+
+  // Draw a square of size N*N
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      // Start from the left most corner point 
+      x = i - r;
+      y = j - r; 
+
+      // If cell is inside the circle, set active
+      if (x * x + y * y <= r * r + 1) {
+        paint.board[y0 + y][x0 + x].setActive();
+      }
+    }
+  }
+}
+
 
 
 // ==================== Event Handlers ====================== //
@@ -275,6 +310,11 @@ paint.colorPickerChangeHandler = e => {
   paint.color = e.target.value;
 }
 
+/** Change the brush size on slider change */
+paint.brushSizeChangeHandler = e => {
+  console.log(e.target.value);
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
@@ -294,6 +334,10 @@ paint.init = () => {
   paint.colorPicker.addEventListener("change", paint.colorPickerChangeHandler);
   // set default color
   paint.color = paint.colorPicker.value;
+
+  // brush size listener
+  paint.brushSizeSlider.addEventListener("change", paint.brushSizeChangeHandler);
+
 
 }
 
