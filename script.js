@@ -269,6 +269,8 @@ paint.drawCircle = (x0, y0, r) => {
 paint.fill = (x, y) => {
   const colorToFill = paint.board[y][x].color;
   console.log(colorToFill);
+
+
 }
 
 
@@ -289,6 +291,10 @@ paint.mouseDownHandler = e => {
     paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
   } else if (paint.brushType === 'fill') {
     paint.fill(cellX, cellY);
+  } else if (paint.brushType === 'dropper') {
+    const color = paint.board[cellY][cellX].color;
+    paint.color = color;
+    paint.colorPicker.value = color;
   }
 }
 
