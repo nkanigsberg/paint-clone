@@ -18,7 +18,7 @@
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, color = '#FFFFFF') {
+  constructor(coordinates, color) {
     this.coordinates = coordinates;
     this.color = color;
   }
@@ -100,7 +100,7 @@ paint.BOARD_WIDTH = 800;
 paint.BOARD_HEIGHT = 600;
 paint.NUM_COLUMNS = paint.BOARD_WIDTH / paint.CELL_WIDTH;
 paint.NUM_ROWS = paint.BOARD_HEIGHT / paint.CELL_HEIGHT;
-paint.DEFAULT_COLOR = '#FFFFFF';
+paint.DEFAULT_COLOR = '#ffffff';
 
 // html elements
 paint.canvas = document.getElementById("paintCanvas");
@@ -137,7 +137,7 @@ paint.initializeBoard = () => {
   for (let y = 0; y < paint.NUM_ROWS; y++) {
     paint.board.push([]);
     for (let x = 0; x < paint.NUM_COLUMNS; x++) {
-      paint.board[y].push(new Cell({ y, x }));
+      paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
     }
   }
 
@@ -146,23 +146,18 @@ paint.initializeBoard = () => {
 
 /** 
  * Draw the board on the canvas 
- * @param {string} color - the color to draw the board (optional)
+ * @param {string} color - the color to draw the board
  * */
 paint.drawBoard = (color) => {
-  // clear canvas before each draw
-  paint.clearBoard();
+  paint.ctx.fillStyle = color;
+  paint.ctx.fillRect(0, 0, paint.BOARD_WIDTH, paint.BOARD_HEIGHT);
 
-  // draw each cell
+  // reset color info for each cell
   paint.board.forEach(row => {
     row.forEach(cell => {
-      cell.draw(color);
+      cell.color = color;
     })
   })
-}
-
-/** clear the the board */
-paint.clearBoard = () => {
-  paint.ctx.clearRect(0, 0, paint.canvas.width, paint.canvas.height);
 }
 
 /** draw at specified coordinates */
@@ -318,7 +313,7 @@ paint.fill = (x, y) => {
 
     let reached_left = false;
     let reached_right = false;
-    while (y++ < paint.BOARD_HEIGHT-1 && paint.board[y][x].color == originalColor) {
+    while (y++ < paint.NUM_ROWS-1 && paint.board[y][x].color == originalColor) {
       paint.board[y][x].color = color;
       paint.board[y][x].draw();
 
@@ -333,7 +328,7 @@ paint.fill = (x, y) => {
         }
       }
 
-      if (x < paint.BOARD_WIDTH - 1) {
+      if (x < paint.NUM_COLUMNS - 1) {
         if (paint.board[y][x + 1].color == originalColor) {
           if (!reached_right) {
             pixelStack.push({ x: x + 1, y: y });
@@ -368,8 +363,10 @@ paint.mouseDownHandler = e => {
     // event listeners for mouse drag and mouse up
     paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
     paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+
   } else if (paint.brushType === 'fill') {
     paint.fill(cellX, cellY);
+    console.log(paint.board);
   } else if (paint.brushType === 'dropper') {
     const color = paint.board[cellY][cellX].color;
     paint.color = color;
@@ -382,8 +379,8 @@ paint.mouseDragHandler = e => {
   paint.mouseDrag = true;
 
   // get cell position
-  const cellX = Math.floor(e.pageX - paint.canvas.offsetLeft / paint.CELL_WIDTH);
-  const cellY = Math.floor(e.pageY - paint.canvas.offsetTop / paint.CELL_HEIGHT);
+  const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
   // draw cell (only if clicking on canvas)
   if (paint.isInsideCanvas(cellX, cellY)) {
@@ -445,7 +442,7 @@ paint.brushTypeChangeHandler = e => {
 
 /** Clear the canvas on click of clear button */
 paint.clearBtnClickHandler = () => {
-  paint.clearBoard();
+  paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
 
