@@ -1,7 +1,8 @@
 // TODO
-  // clear
-  // erase
-  // remove setActive and just set colors
+  // make settings = cached controls
+
+  // eraser cursor (and other cursors)
+  // show size of brush
 
   // save
     // cloud?
@@ -342,6 +343,7 @@ paint.isInsideCanvas = (x, y) => {
   else return false;
 }
 
+
 // ==================== Event Handlers ====================== //
 
 
@@ -459,14 +461,23 @@ paint.init = () => {
 
   // color picker listener
   paint.colorPicker.addEventListener("change", paint.colorPickerChangeHandler);
-  // set default color
-  paint.color = paint.colorPicker.value;
+  paint.color = paint.colorPicker.value; // set default
 
   // brush size listener
   paint.brushSizeSlider.addEventListener("change", paint.brushSizeChangeHandler);
+  paint.brushSize = paint.brushSizeSlider.value; // set default
 
-  // paint bucket listener
+  // brush type listener
   paint.brushTypes.addEventListener("change", paint.brushTypeChangeHandler);
+  // set default brush type
+  for (let i in paint.brushTypes.elements) {
+    if (paint.brushTypes.elements[i].checked) {
+      console.log(paint.brushTypes.elements[i]);
+      paint.brushType = paint.brushTypes.elements[i].value; // set default
+    }
+  }
+  // if default is eraser - set to default color
+  if (paint.brushType === 'eraser') paint.color = paint.DEFAULT_COLOR;
 
   // clear button listener
   paint.clearBtn.addEventListener("click", paint.clearBtnClickHandler);
