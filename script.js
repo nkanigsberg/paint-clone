@@ -1,5 +1,4 @@
 // TODO
-  // fix circle error at edge of canvas (undefined cells)
   // clear
   // erase
   // save
@@ -296,8 +295,8 @@ paint.drawCircle = (x0, y0, r) => {
       pixelX = x0 + x;
       pixelY = y0 + y;
 
-      // if pixel color isn't the new paint color (to avoid recoloring - huge performance gain)
-      if (paint.board[pixelY][pixelX].color !== paint.color) {
+      // if pixel color isn't the new paint color (to avoid recoloring - huge performance gain), and if pixel is inside canvas
+      if (paint.isInsideCanvas(pixelX, pixelY) && paint.board[pixelY][pixelX].color !== paint.color) {
         // If cell is inside the circle, set active
         if (x * x + y * y <= r * r + 1) {
           paint.board[pixelY][pixelX].setActive();
@@ -367,6 +366,12 @@ paint.fill = (x, y) => {
   }
 }
 
+/** Returns true if specified coordinates are inside the canvas, false otherwise */
+paint.isInsideCanvas = (x, y) => {
+  if (y < paint.NUM_ROWS && y >= 0 && x < paint.NUM_COLUMNS && x >= 0)
+    return true;
+  else return false;
+}
 
 // ==================== Event Handlers ====================== //
 
@@ -395,15 +400,12 @@ paint.mouseDownHandler = e => {
 paint.mouseDragHandler = e => {
   paint.mouseDrag = true;
 
-  const posX = e.pageX - paint.canvas.offsetLeft;
-  const posY = e.pageY - paint.canvas.offsetTop;
-
   // get cell position
-  const cellX = Math.floor(posX / paint.CELL_WIDTH);
-  const cellY = Math.floor(posY / paint.CELL_HEIGHT);
+  const cellX = Math.floor(e.pageX - paint.canvas.offsetLeft / paint.CELL_WIDTH);
+  const cellY = Math.floor(e.pageY - paint.canvas.offsetTop / paint.CELL_HEIGHT);
 
   // toggle cell active (only if clicking on a cell)
-  if (cellY < paint.BOARD_HEIGHT / paint.CELL_HEIGHT && cellX < paint.BOARD_WIDTH / paint.CELL_WIDTH) {
+  if (paint.isInsideCanvas(cellX, cellY)) {
     paint.draw(cellX, cellY)
   
     // if distance between the last painted cell and this cell is greater than 1, fill in the gap
@@ -425,8 +427,8 @@ paint.mouseUpHandler = e => {
     const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
     const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
-    // toggle cell active (only if clicking on a cell)
-    if (cellY < paint.BOARD_HEIGHT / paint.CELL_HEIGHT && cellX < paint.BOARD_WIDTH / paint.CELL_WIDTH)
+    // toggle cell active (only if cell is inside canvas)
+    if (paint.isInsideCanvas(cellX, cellY))
       paint.draw(cellX, cellY);
   }
 
