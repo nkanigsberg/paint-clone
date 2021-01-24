@@ -3,7 +3,6 @@
     // make it perform better!
       // add fill functionality - then draw lines and fill them (instead of drawing a new circle at every point)
       // keep track of previously filled cells on drag, and omit from new circles?
-  // paint bucket
   // fix circle error at edge of canvas (undefined cells)
   // clear
   // erase
@@ -11,6 +10,8 @@
     // cloud?
     // download
   // remove setActive and just set colors
+  // potentially some pixel color issues around edges (esp. after paint bucket?) - maybe need to offset pixel values with canvas
+  // mouse 2 for second color
 
 // ========================== Cell ======================== //
 
@@ -318,6 +319,9 @@ paint.fill = (x, y) => {
   const originalColor = paint.board[y][x].color;
   const color = paint.color;
   
+  // only fill if color is different than clicked pixel
+  if (originalColor === color) return;
+
   const pixelStack = [{ x: x, y: y }];
 
   while (pixelStack.length > 0) {
