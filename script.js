@@ -25,9 +25,6 @@ class Cell {
 
   /** draw this cell on the canvas */
   draw(color = null) {
-    // erase this cell before (re)drawing
-    this.erase();
-
     this.color = color ? color : paint.color;
 
     const ctx = paint.ctx;
@@ -40,11 +37,7 @@ class Cell {
 
   /** erase the cell from the canvas */
   erase() {
-    const ctx = paint.ctx;
-    const coordX = this.coordinates.x * paint.CELL_WIDTH;
-    const coordY = this.coordinates.y * paint.CELL_HEIGHT;
-
-    ctx.clearRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
+    this.draw(paint.DEFAULT_COLOR)
   }
 
   // /** fill this cell's neighbours that have the specified color */
@@ -359,19 +352,19 @@ paint.mouseDownHandler = e => {
   const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
   // perform action depending on brush type
-  if (paint.brushType === 'pencil') {
+  if (paint.brushType === 'pencil' || paint.brushType === 'eraser') {
     // event listeners for mouse drag and mouse up
     paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
     paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
 
   } else if (paint.brushType === 'fill') {
     paint.fill(cellX, cellY);
-    console.log(paint.board);
+
   } else if (paint.brushType === 'dropper') {
     const color = paint.board[cellY][cellX].color;
     paint.color = color;
     paint.colorPicker.value = color;
-  }
+  } 
 }
 
 /** Toggle cells when clicking and dragging over them */
@@ -437,7 +430,11 @@ paint.brushSizeChangeHandler = e => {
 
 /** Change current brush type to selected */
 paint.brushTypeChangeHandler = e => {
-  paint.brushType = e.target.value;
+  const selection = e.target.value;
+  paint.brushType = selection;
+
+  if (selection === 'eraser') paint.color = paint.DEFAULT_COLOR;
+  else paint.color = colorPicker.value;
 }
 
 /** Clear the canvas on click of clear button */
