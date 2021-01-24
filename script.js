@@ -1,12 +1,18 @@
 // TODO
   // clear
   // erase
+  // remove setActive and just set colors
+
   // save
     // cloud?
     // download
-  // remove setActive and just set colors
   // potentially some pixel color issues around edges (esp. after paint bucket?) - maybe need to offset pixel values with canvas
   // mouse 2 for second color
+  // option to resize canvas
+  // zoom?
+    // utilize cell size change
+  // Clean up UI
+    // Fontawesome icons
 
 // ========================== Cell ======================== //
 
@@ -125,10 +131,8 @@ paint.ctx = paint.canvas.getContext("2d");
 
 paint.colorPicker = document.getElementById("colorPicker");
 paint.brushSizeSlider = document.getElementById("brushSize");
-
-// paint.pencil = document.getElementById("pencil");
-// paint.paintBucket = document.getElementById("paintBucket");
 paint.brushTypes = document.getElementById("brushTypes");
+paint.clearBtn = document.getElementById("clear");
 
 /** The 2D array representation of the game board */
 paint.board = [];
@@ -462,6 +466,11 @@ paint.brushTypeChangeHandler = e => {
   paint.brushType = e.target.value;
 }
 
+/** Clear the canvas on click of clear button */
+paint.clearBtnClickHandler = () => {
+  paint.clearBoard();
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
@@ -487,6 +496,9 @@ paint.init = () => {
 
   // paint bucket listener
   paint.brushTypes.addEventListener("change", paint.brushTypeChangeHandler);
+
+  // clear button listener
+  paint.clearBtn.addEventListener("click", paint.clearBtnClickHandler);
 
 }
 
