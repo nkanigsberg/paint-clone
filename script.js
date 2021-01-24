@@ -18,48 +18,24 @@
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, color = '#FFFFFF', active = false) {
+  constructor(coordinates, color = '#FFFFFF') {
     this.coordinates = coordinates;
     this.color = color;
-    this.active = active;
   }
-
-  /** Toggle whether or not this cell is active */
-  toggleActive() {
-    this.active = !this.active;
-    this.draw();
-  }
-
-  /** Set this cell to active */
-  setActive(color = null) {
-    this.active = true;
-    this.color = paint.color;
-    this.draw(color);
-  }
-
-  /** Set this cell to inactive */
-  setInactive() {
-    this.active = false;
-    this.draw();
-  }
-
 
   /** draw this cell on the canvas */
   draw(color = null) {
     // erase this cell before (re)drawing
     this.erase();
 
+    this.color = color ? color : paint.color;
+
     const ctx = paint.ctx;
     const coordX = this.coordinates.x * paint.CELL_WIDTH;
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
-    if (this.active) {
-      ctx.fillStyle = color ? color : this.color;
-      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
-    } else {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
-    }
+    ctx.fillStyle = this.color;
+    ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
   }
 
   /** erase the cell from the canvas */
@@ -124,6 +100,7 @@ paint.BOARD_WIDTH = 800;
 paint.BOARD_HEIGHT = 600;
 paint.NUM_COLUMNS = paint.BOARD_WIDTH / paint.CELL_WIDTH;
 paint.NUM_ROWS = paint.BOARD_HEIGHT / paint.CELL_HEIGHT;
+paint.DEFAULT_COLOR = '#FFFFFF';
 
 // html elements
 paint.canvas = document.getElementById("paintCanvas");
@@ -136,9 +113,6 @@ paint.clearBtn = document.getElementById("clear");
 
 /** The 2D array representation of the game board */
 paint.board = [];
-
-/** What type of cell to toggle on click and drag */
-paint.dragType = 'active';
 
 /** True if mouse has been dragged */
 paint.mouseDrag = false;
@@ -167,18 +141,21 @@ paint.initializeBoard = () => {
     }
   }
 
-  paint.drawBoard();
+  paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
-/** Draw the board on the canvas */
-paint.drawBoard = () => {
+/** 
+ * Draw the board on the canvas 
+ * @param {string} color - the color to draw the board (optional)
+ * */
+paint.drawBoard = (color) => {
   // clear canvas before each draw
   paint.clearBoard();
 
   // draw each cell
   paint.board.forEach(row => {
     row.forEach(cell => {
-      cell.draw();
+      cell.draw(color);
     })
   })
 }
@@ -194,7 +171,7 @@ paint.draw = (x, y) => {
   if (paint.brushSize > 1) {
     paint.drawCircle(x, y, paint.brushSize)
   } else{
-    paint.board[y][x].setActive();
+    paint.board[y][x].draw();
   }
 }
 
@@ -301,9 +278,9 @@ paint.drawCircle = (x0, y0, r) => {
 
       // if pixel color isn't the new paint color (to avoid recoloring - huge performance gain), and if pixel is inside canvas
       if (paint.isInsideCanvas(pixelX, pixelY) && paint.board[pixelY][pixelX].color !== paint.color) {
-        // If cell is inside the circle, set active
+        // If cell is inside the circle, draw it
         if (x * x + y * y <= r * r + 1) {
-          paint.board[pixelY][pixelX].setActive();
+          paint.board[pixelY][pixelX].draw();
         }
       }
     }
@@ -343,7 +320,7 @@ paint.fill = (x, y) => {
     let reached_right = false;
     while (y++ < paint.BOARD_HEIGHT-1 && paint.board[y][x].color == originalColor) {
       paint.board[y][x].color = color;
-      paint.board[y][x].setActive();
+      paint.board[y][x].draw();
 
       if (x > 0) {
         if (paint.board[y][x - 1].color == originalColor) {
@@ -408,7 +385,7 @@ paint.mouseDragHandler = e => {
   const cellX = Math.floor(e.pageX - paint.canvas.offsetLeft / paint.CELL_WIDTH);
   const cellY = Math.floor(e.pageY - paint.canvas.offsetTop / paint.CELL_HEIGHT);
 
-  // toggle cell active (only if clicking on a cell)
+  // draw cell (only if clicking on canvas)
   if (paint.isInsideCanvas(cellX, cellY)) {
     paint.draw(cellX, cellY)
   
@@ -431,7 +408,7 @@ paint.mouseUpHandler = e => {
     const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
     const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
-    // toggle cell active (only if cell is inside canvas)
+    // draw cell (only if clicking on canvas)
     if (paint.isInsideCanvas(cellX, cellY))
       paint.draw(cellX, cellY);
   }
