@@ -10,6 +10,7 @@
   // save
     // cloud?
     // download
+  // remove setActive and just set colors
 
 // ========================== Cell ======================== //
 
@@ -28,10 +29,10 @@ class Cell {
   }
 
   /** Set this cell to active */
-  setActive() {
+  setActive(color = null) {
     this.active = true;
     this.color = paint.color;
-    this.draw();
+    this.draw(color);
   }
 
   /** Set this cell to inactive */
@@ -42,7 +43,7 @@ class Cell {
 
 
   /** draw this cell on the canvas */
-  draw() {
+  draw(color = null) {
     // erase this cell before (re)drawing
     this.erase();
 
@@ -51,7 +52,7 @@ class Cell {
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
     if (this.active) {
-      ctx.fillStyle = paint.color;
+      ctx.fillStyle = color ? color : this.color;
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     } else {
       ctx.fillStyle = '#FFFFFF';
@@ -68,56 +69,42 @@ class Cell {
     ctx.clearRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
   }
 
-  /** fill this cell's neighbours that have the specified color */
-  fillNeighbours(color) {
-    console.log('fillNeighbours');
-    const { x, y } = this.coordinates;
+  // /** fill this cell's neighbours that have the specified color */
+  // fillNeighbours(colorToFill) {
+  //   const { x, y } = this.coordinates;
 
-    // // loop through surrounding x and y coordinates and fill appropriate neighbours
-    // for (let y = cellY - 1; y <= cellY + 1; y++) {
-    //   // if inside vertical boundaries
-    //   if (y >= 0 && y < paint.NUM_ROWS) {
-    //     for (let x = cellX - 1; x <= cellX + 1; x++) {
-    //       // if inside horizontal boundaries, and not the central cell
-    //       if (x >= 0 && x < paint.NUM_COLUMNS && (y !== cellY || x !== cellX)) {
-    //         // if this cell has provided color
-    //         if (paint.board[y][x].color === color) {
-    //           // set this cell to new color
-    //           paint.board[y][x].color = paint.color;
-    //           // fill this cell's neighbours
-    //           paint.board[y][x].fillNeighbours(color);
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
+  //   // this cell's neighbour coordinates
+  //   const neighbours = {
+  //     up: { x, y: y + 1 },
+  //     right: { x: x + 1, y },
+  //     down: { x, y: y - 1 },
+  //     left: { x: x - 1, y }
+  //   }
 
-    // this cell's neighbour coordinates
-    const neighbours = {
-      up: { x, y: y + 1 },
-      right: { x: x + 1, y },
-      down: { x, y: y - 1 },
-      left: { x: x - 1, y }
-    }
+  //   // loop through neighbours and fill if appropriate
+  //   for (let i in neighbours) {
+  //     const coords = neighbours[i];
+  //     // only if within canvas boundaries
+  //     if (coords.x >= 0 && coords.x < paint.NUM_COLUMNS && coords.y >= 0 && coords.y < paint.NUM_ROWS) {
+  //       // if this cell has provided color & provided color isn't the same as new color
+  //       if (paint.board[coords.y][coords.x].color === colorToFill && colorToFill !== paint.color) {
+  //         // set this cell to new color
+  //         paint.board[coords.y][coords.x].color = paint.color;
+  //         // redraw this cell
+  //         paint.board[coords.y][coords.x].setActive();
 
-    // loop through neighbours and fill if appropriate
-    for (let i in neighbours) {
-      const coords = neighbours[i];
-      console.log(coords);
-      // only if within canvas boundaries
-      if (coords.x >= 0 && coords.x < paint.NUM_COLUMNS && coords.y >= 0 && coords.y < paint.NUM_ROWS) {
-        // if this cell has provided color
-        if (paint.board[coords.y][coords.x].color === color) {
-          // set this cell to new color
-          paint.board[coords.y][coords.x].color = paint.color;
-          // redraw this cell
-          paint.board[coords.y][coords.x].setActive();
-          // fill this cell's neighbours
-          paint.board[coords.y][coords.x].fillNeighbours(color);
-        }
-      }
-    }
-  }
+  //         // fill this cell's neighbours
+  //         // paint.board[coords.y][coords.x].fillNeighbours(colorToFill);
+
+  //         // TODO timeout for debug purposes - looks cool, maybe implement as feature?
+  //         setTimeout(()=> {
+  //           paint.board[coords.y][coords.x].fillNeighbours(colorToFill);
+  //           console.log('filling');
+  //         }, 10);
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 
@@ -170,7 +157,6 @@ paint.brushSize = 1;
  * Allowed types (so far): 'pencil', 'fill'
  */
 paint.brushType = 'pencil';
-
 
 /** Create 2D array and draw the board */
 paint.initializeBoard = () => {
@@ -316,12 +302,62 @@ paint.drawCircle = (x0, y0, r) => {
   }
 }
 
-/** Fill all connected cells matching color from specified coordinates */
-paint.fill = (x, y) => {
-  const colorToFill = paint.board[y][x].color;
-  paint.board[y][x].fillNeighbours(colorToFill);
-}
+// /** Fill all connected cells matching color from specified coordinates */
+// paint.fill = (x, y) => {
+//   const colorToFill = paint.board[y][x].color;
+//   paint.board[y][x].fillNeighbours(colorToFill);
+// }
 
+/** 
+ * Fill all connected cells matching color from specified coordinates
+ * - Non-recursive solution adapted from here: https://www.freecodecamp.org/news/flood-fill-algorithm-explained/
+ *  - This example specifically: https://ben.akrin.com/canvas_fill/fill_04.html
+ * - Recursive solutions are very slow and can hit browser recursion limits
+ *  */
+paint.fill = (x, y) => {
+  const originalColor = paint.board[y][x].color;
+  const color = paint.color;
+  
+  const pixelStack = [{ x: x, y: y }];
+
+  while (pixelStack.length > 0) {
+    const newPixel = pixelStack.shift();
+    x = newPixel.x;
+    y = newPixel.y;
+
+    // move y up until no longer the right color (or edge of canvas)
+    while (y-- > 0 && paint.board[y][x].color == originalColor);
+
+    let reached_left = false;
+    let reached_right = false;
+    while (y++ < paint.BOARD_HEIGHT-1 && paint.board[y][x].color == originalColor) {
+      paint.board[y][x].color = color;
+      paint.board[y][x].setActive();
+
+      if (x > 0) {
+        if (paint.board[y][x - 1].color == originalColor) {
+          if (!reached_left) {
+            pixelStack.push({ x: x - 1, y: y });
+            reached_left = true;
+          }
+        } else if (reached_left) {
+          reached_left = false;
+        }
+      }
+
+      if (x < paint.BOARD_WIDTH - 1) {
+        if (paint.board[y][x + 1].color == originalColor) {
+          if (!reached_right) {
+            pixelStack.push({ x: x + 1, y: y });
+            reached_right = true;
+          }
+        } else if (reached_right) {
+          reached_right = false;
+        }
+      }
+    }
+  }
+}
 
 
 // ==================== Event Handlers ====================== //
