@@ -1,8 +1,4 @@
 // TODO
-  // brush size
-    // make it perform better!
-      // add fill functionality - then draw lines and fill them (instead of drawing a new circle at every point)
-      // keep track of previously filled cells on drag, and omit from new circles?
   // fix circle error at edge of canvas (undefined cells)
   // clear
   // erase
@@ -288,16 +284,24 @@ paint.drawCircle = (x0, y0, r) => {
   // Coordinates inside the rectangle 
   let x, y;
 
+  // Actual pixel coordinates
+  let pixelX, pixelY;
+
   // Draw a square of size N*N
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {
       // Start from the left most corner point 
       x = i - r;
-      y = j - r; 
+      y = j - r;
+      pixelX = x0 + x;
+      pixelY = y0 + y;
 
-      // If cell is inside the circle, set active
-      if (x * x + y * y <= r * r + 1) {
-        paint.board[y0 + y][x0 + x].setActive();
+      // if pixel color isn't the new paint color (to avoid recoloring - huge performance gain)
+      if (paint.board[pixelY][pixelX].color !== paint.color) {
+        // If cell is inside the circle, set active
+        if (x * x + y * y <= r * r + 1) {
+          paint.board[pixelY][pixelX].setActive();
+        }
       }
     }
   }
