@@ -22,10 +22,24 @@
   <main>
     <div class="wrapper">
       <div class="controlBar">
+
+        <!-- color picker -->
         <label for="colorPicker">Color:</label>
         <input type="color" id="colorPicker">
+
+        <!-- brush size -->
         <label for="brushSize">Brush Size:</label>
         <input type="range" id="brushSize" min="1" max="50" value="1">
+
+        <!-- brush types -->
+        <fieldset id="brushTypes">
+          <label for="pencil">Pencil:</label>
+          <input type="radio" name="brushType" id="pencil" value="pencil" checked>
+          <label for="paintBucket">Paint bucket:</label>
+          <input type="radio" name="brushType" id="paintBucket" value="fill">
+          <label for="dropper">Dropper:</label>
+          <input type="radio" name="brushType" id="dropper" value="dropper">
+        </fieldset>
       </div>
       <canvas id="paintCanvas"></canvas>
     </div>

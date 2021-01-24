@@ -1,18 +1,24 @@
 // TODO
   // brush size
+    // make it perform better!
+      // add fill functionality - then draw lines and fill them (instead of drawing a new circle at every point)
+      // keep track of previously filled cells on drag, and omit from new circles?
   // paint bucket
+  // fix circle error at edge of canvas (undefined cells)
   // clear
   // erase
   // save
     // cloud?
     // download
+  // remove setActive and just set colors
 
 // ========================== Cell ======================== //
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, active = false) {
+  constructor(coordinates, color = '#FFFFFF', active = false) {
     this.coordinates = coordinates;
+    this.color = color;
     this.active = active;
   }
 
@@ -23,9 +29,10 @@ class Cell {
   }
 
   /** Set this cell to active */
-  setActive() {
+  setActive(color = null) {
     this.active = true;
-    this.draw();
+    this.color = paint.color;
+    this.draw(color);
   }
 
   /** Set this cell to inactive */
@@ -36,7 +43,7 @@ class Cell {
 
 
   /** draw this cell on the canvas */
-  draw() {
+  draw(color = null) {
     // erase this cell before (re)drawing
     this.erase();
 
@@ -45,7 +52,7 @@ class Cell {
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
     if (this.active) {
-      ctx.fillStyle = paint.color;
+      ctx.fillStyle = color ? color : this.color;
       ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
     } else {
       ctx.fillStyle = '#FFFFFF';
@@ -61,6 +68,43 @@ class Cell {
 
     ctx.clearRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
   }
+
+  // /** fill this cell's neighbours that have the specified color */
+  // fillNeighbours(colorToFill) {
+  //   const { x, y } = this.coordinates;
+
+  //   // this cell's neighbour coordinates
+  //   const neighbours = {
+  //     up: { x, y: y + 1 },
+  //     right: { x: x + 1, y },
+  //     down: { x, y: y - 1 },
+  //     left: { x: x - 1, y }
+  //   }
+
+  //   // loop through neighbours and fill if appropriate
+  //   for (let i in neighbours) {
+  //     const coords = neighbours[i];
+  //     // only if within canvas boundaries
+  //     if (coords.x >= 0 && coords.x < paint.NUM_COLUMNS && coords.y >= 0 && coords.y < paint.NUM_ROWS) {
+  //       // if this cell has provided color & provided color isn't the same as new color
+  //       if (paint.board[coords.y][coords.x].color === colorToFill && colorToFill !== paint.color) {
+  //         // set this cell to new color
+  //         paint.board[coords.y][coords.x].color = paint.color;
+  //         // redraw this cell
+  //         paint.board[coords.y][coords.x].setActive();
+
+  //         // fill this cell's neighbours
+  //         // paint.board[coords.y][coords.x].fillNeighbours(colorToFill);
+
+  //         // TODO timeout for debug purposes - looks cool, maybe implement as feature?
+  //         setTimeout(()=> {
+  //           paint.board[coords.y][coords.x].fillNeighbours(colorToFill);
+  //           console.log('filling');
+  //         }, 10);
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 
@@ -86,6 +130,10 @@ paint.ctx = paint.canvas.getContext("2d");
 paint.colorPicker = document.getElementById("colorPicker");
 paint.brushSizeSlider = document.getElementById("brushSize");
 
+// paint.pencil = document.getElementById("pencil");
+// paint.paintBucket = document.getElementById("paintBucket");
+paint.brushTypes = document.getElementById("brushTypes");
+
 /** The 2D array representation of the game board */
 paint.board = [];
 
@@ -104,6 +152,11 @@ paint.color = '#000000';
 /** The brush size to draw with, default is 1px */
 paint.brushSize = 1;
 
+/** 
+ * The currently active brush type, default is 'pencil'
+ * Allowed types (so far): 'pencil', 'fill'
+ */
+paint.brushType = 'pencil';
 
 /** Create 2D array and draw the board */
 paint.initializeBoard = () => {
@@ -249,16 +302,85 @@ paint.drawCircle = (x0, y0, r) => {
   }
 }
 
+// /** Fill all connected cells matching color from specified coordinates */
+// paint.fill = (x, y) => {
+//   const colorToFill = paint.board[y][x].color;
+//   paint.board[y][x].fillNeighbours(colorToFill);
+// }
+
+/** 
+ * Fill all connected cells matching color from specified coordinates
+ * - Non-recursive solution adapted from here: https://www.freecodecamp.org/news/flood-fill-algorithm-explained/
+ *  - This example specifically: https://ben.akrin.com/canvas_fill/fill_04.html
+ * - Recursive solutions are very slow and can hit browser recursion limits
+ *  */
+paint.fill = (x, y) => {
+  const originalColor = paint.board[y][x].color;
+  const color = paint.color;
+  
+  const pixelStack = [{ x: x, y: y }];
+
+  while (pixelStack.length > 0) {
+    const newPixel = pixelStack.shift();
+    x = newPixel.x;
+    y = newPixel.y;
+
+    // move y up until no longer the right color (or edge of canvas)
+    while (y-- > 0 && paint.board[y][x].color == originalColor);
+
+    let reached_left = false;
+    let reached_right = false;
+    while (y++ < paint.BOARD_HEIGHT-1 && paint.board[y][x].color == originalColor) {
+      paint.board[y][x].color = color;
+      paint.board[y][x].setActive();
+
+      if (x > 0) {
+        if (paint.board[y][x - 1].color == originalColor) {
+          if (!reached_left) {
+            pixelStack.push({ x: x - 1, y: y });
+            reached_left = true;
+          }
+        } else if (reached_left) {
+          reached_left = false;
+        }
+      }
+
+      if (x < paint.BOARD_WIDTH - 1) {
+        if (paint.board[y][x + 1].color == originalColor) {
+          if (!reached_right) {
+            pixelStack.push({ x: x + 1, y: y });
+            reached_right = true;
+          }
+        } else if (reached_right) {
+          reached_right = false;
+        }
+      }
+    }
+  }
+}
 
 
 // ==================== Event Handlers ====================== //
 
 
-/** toggle whether cell is active on click */
-paint.mouseDownHandler = () => {
-  // event listeners for mouse drag and mouse up
-  paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
-  paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+/** Perform action depending on selected brush type */
+paint.mouseDownHandler = e => {
+  // Get cell coordinates
+  const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
+
+  // perform action depending on brush type
+  if (paint.brushType === 'pencil') {
+    // event listeners for mouse drag and mouse up
+    paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
+    paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+  } else if (paint.brushType === 'fill') {
+    paint.fill(cellX, cellY);
+  } else if (paint.brushType === 'dropper') {
+    const color = paint.board[cellY][cellX].color;
+    paint.color = color;
+    paint.colorPicker.value = color;
+  }
 }
 
 /** Toggle cells when clicking and dragging over them */
@@ -325,6 +447,11 @@ paint.brushSizeChangeHandler = e => {
   paint.brushSize = e.target.value;
 }
 
+/** Change current brush type to selected */
+paint.brushTypeChangeHandler = e => {
+  paint.brushType = e.target.value;
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
@@ -348,6 +475,8 @@ paint.init = () => {
   // brush size listener
   paint.brushSizeSlider.addEventListener("change", paint.brushSizeChangeHandler);
 
+  // paint bucket listener
+  paint.brushTypes.addEventListener("change", paint.brushTypeChangeHandler);
 
 }
 
