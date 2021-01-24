@@ -1,68 +1,43 @@
 // TODO
   // clear
   // erase
+  // remove setActive and just set colors
+
   // save
     // cloud?
     // download
-  // remove setActive and just set colors
   // potentially some pixel color issues around edges (esp. after paint bucket?) - maybe need to offset pixel values with canvas
   // mouse 2 for second color
+  // option to resize canvas
+  // zoom?
+    // utilize cell size change
+  // Clean up UI
+    // Fontawesome icons
 
 // ========================== Cell ======================== //
 
 /** Class representing a Cell */
 class Cell {
-  constructor(coordinates, color = '#FFFFFF', active = false) {
+  constructor(coordinates, color) {
     this.coordinates = coordinates;
     this.color = color;
-    this.active = active;
   }
-
-  /** Toggle whether or not this cell is active */
-  toggleActive() {
-    this.active = !this.active;
-    this.draw();
-  }
-
-  /** Set this cell to active */
-  setActive(color = null) {
-    this.active = true;
-    this.color = paint.color;
-    this.draw(color);
-  }
-
-  /** Set this cell to inactive */
-  setInactive() {
-    this.active = false;
-    this.draw();
-  }
-
 
   /** draw this cell on the canvas */
   draw(color = null) {
-    // erase this cell before (re)drawing
-    this.erase();
+    this.color = color ? color : paint.color;
 
     const ctx = paint.ctx;
     const coordX = this.coordinates.x * paint.CELL_WIDTH;
     const coordY = this.coordinates.y * paint.CELL_HEIGHT;
 
-    if (this.active) {
-      ctx.fillStyle = color ? color : this.color;
-      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
-    } else {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
-    }
+    ctx.fillStyle = this.color;
+    ctx.fillRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
   }
 
   /** erase the cell from the canvas */
   erase() {
-    const ctx = paint.ctx;
-    const coordX = this.coordinates.x * paint.CELL_WIDTH;
-    const coordY = this.coordinates.y * paint.CELL_HEIGHT;
-
-    ctx.clearRect(coordX, coordY, paint.CELL_WIDTH, paint.CELL_HEIGHT);
+    this.draw(paint.DEFAULT_COLOR)
   }
 
   // /** fill this cell's neighbours that have the specified color */
@@ -118,6 +93,7 @@ paint.BOARD_WIDTH = 800;
 paint.BOARD_HEIGHT = 600;
 paint.NUM_COLUMNS = paint.BOARD_WIDTH / paint.CELL_WIDTH;
 paint.NUM_ROWS = paint.BOARD_HEIGHT / paint.CELL_HEIGHT;
+paint.DEFAULT_COLOR = '#ffffff';
 
 // html elements
 paint.canvas = document.getElementById("paintCanvas");
@@ -125,16 +101,11 @@ paint.ctx = paint.canvas.getContext("2d");
 
 paint.colorPicker = document.getElementById("colorPicker");
 paint.brushSizeSlider = document.getElementById("brushSize");
-
-// paint.pencil = document.getElementById("pencil");
-// paint.paintBucket = document.getElementById("paintBucket");
 paint.brushTypes = document.getElementById("brushTypes");
+paint.clearBtn = document.getElementById("clear");
 
 /** The 2D array representation of the game board */
 paint.board = [];
-
-/** What type of cell to toggle on click and drag */
-paint.dragType = 'active';
 
 /** True if mouse has been dragged */
 paint.mouseDrag = false;
@@ -159,29 +130,27 @@ paint.initializeBoard = () => {
   for (let y = 0; y < paint.NUM_ROWS; y++) {
     paint.board.push([]);
     for (let x = 0; x < paint.NUM_COLUMNS; x++) {
-      paint.board[y].push(new Cell({ y, x }));
+      paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
     }
   }
 
-  paint.drawBoard();
+  paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
-/** Draw the board on the canvas */
-paint.drawBoard = () => {
-  // clear canvas before each draw
-  paint.clearBoard();
+/** 
+ * Draw the board on the canvas 
+ * @param {string} color - the color to draw the board
+ * */
+paint.drawBoard = (color) => {
+  paint.ctx.fillStyle = color;
+  paint.ctx.fillRect(0, 0, paint.BOARD_WIDTH, paint.BOARD_HEIGHT);
 
-  // draw each cell
+  // reset color info for each cell
   paint.board.forEach(row => {
     row.forEach(cell => {
-      cell.draw();
+      cell.color = color;
     })
   })
-}
-
-/** clear the the board */
-paint.clearBoard = () => {
-  paint.ctx.clearRect(0, 0, paint.canvas.width, paint.canvas.height);
 }
 
 /** draw at specified coordinates */
@@ -190,7 +159,7 @@ paint.draw = (x, y) => {
   if (paint.brushSize > 1) {
     paint.drawCircle(x, y, paint.brushSize)
   } else{
-    paint.board[y][x].setActive();
+    paint.board[y][x].draw();
   }
 }
 
@@ -297,9 +266,9 @@ paint.drawCircle = (x0, y0, r) => {
 
       // if pixel color isn't the new paint color (to avoid recoloring - huge performance gain), and if pixel is inside canvas
       if (paint.isInsideCanvas(pixelX, pixelY) && paint.board[pixelY][pixelX].color !== paint.color) {
-        // If cell is inside the circle, set active
+        // If cell is inside the circle, draw it
         if (x * x + y * y <= r * r + 1) {
-          paint.board[pixelY][pixelX].setActive();
+          paint.board[pixelY][pixelX].draw();
         }
       }
     }
@@ -337,9 +306,9 @@ paint.fill = (x, y) => {
 
     let reached_left = false;
     let reached_right = false;
-    while (y++ < paint.BOARD_HEIGHT-1 && paint.board[y][x].color == originalColor) {
+    while (y++ < paint.NUM_ROWS-1 && paint.board[y][x].color == originalColor) {
       paint.board[y][x].color = color;
-      paint.board[y][x].setActive();
+      paint.board[y][x].draw();
 
       if (x > 0) {
         if (paint.board[y][x - 1].color == originalColor) {
@@ -352,7 +321,7 @@ paint.fill = (x, y) => {
         }
       }
 
-      if (x < paint.BOARD_WIDTH - 1) {
+      if (x < paint.NUM_COLUMNS - 1) {
         if (paint.board[y][x + 1].color == originalColor) {
           if (!reached_right) {
             pixelStack.push({ x: x + 1, y: y });
@@ -383,17 +352,19 @@ paint.mouseDownHandler = e => {
   const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
   // perform action depending on brush type
-  if (paint.brushType === 'pencil') {
+  if (paint.brushType === 'pencil' || paint.brushType === 'eraser') {
     // event listeners for mouse drag and mouse up
     paint.canvas.addEventListener("mousemove", paint.mouseDragHandler);
     paint.canvas.addEventListener("mouseup", paint.mouseUpHandler);
+
   } else if (paint.brushType === 'fill') {
     paint.fill(cellX, cellY);
+
   } else if (paint.brushType === 'dropper') {
     const color = paint.board[cellY][cellX].color;
     paint.color = color;
     paint.colorPicker.value = color;
-  }
+  } 
 }
 
 /** Toggle cells when clicking and dragging over them */
@@ -401,10 +372,10 @@ paint.mouseDragHandler = e => {
   paint.mouseDrag = true;
 
   // get cell position
-  const cellX = Math.floor(e.pageX - paint.canvas.offsetLeft / paint.CELL_WIDTH);
-  const cellY = Math.floor(e.pageY - paint.canvas.offsetTop / paint.CELL_HEIGHT);
+  const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
+  const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
-  // toggle cell active (only if clicking on a cell)
+  // draw cell (only if clicking on canvas)
   if (paint.isInsideCanvas(cellX, cellY)) {
     paint.draw(cellX, cellY)
   
@@ -427,7 +398,7 @@ paint.mouseUpHandler = e => {
     const cellX = Math.floor((e.pageX - paint.canvas.offsetLeft) / paint.CELL_WIDTH);
     const cellY = Math.floor((e.pageY - paint.canvas.offsetTop) / paint.CELL_HEIGHT);
 
-    // toggle cell active (only if cell is inside canvas)
+    // draw cell (only if clicking on canvas)
     if (paint.isInsideCanvas(cellX, cellY))
       paint.draw(cellX, cellY);
   }
@@ -459,7 +430,16 @@ paint.brushSizeChangeHandler = e => {
 
 /** Change current brush type to selected */
 paint.brushTypeChangeHandler = e => {
-  paint.brushType = e.target.value;
+  const selection = e.target.value;
+  paint.brushType = selection;
+
+  if (selection === 'eraser') paint.color = paint.DEFAULT_COLOR;
+  else paint.color = colorPicker.value;
+}
+
+/** Clear the canvas on click of clear button */
+paint.clearBtnClickHandler = () => {
+  paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
 
@@ -487,6 +467,9 @@ paint.init = () => {
 
   // paint bucket listener
   paint.brushTypes.addEventListener("change", paint.brushTypeChangeHandler);
+
+  // clear button listener
+  paint.clearBtn.addEventListener("click", paint.clearBtnClickHandler);
 
 }
 
