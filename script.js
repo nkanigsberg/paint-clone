@@ -1,19 +1,17 @@
 // TODO
-  // make settings = cached controls
-
+  // option to resize canvas
   // eraser cursor (and other cursors)
   // show size of brush
-
   // save
     // cloud?
     // download
   // potentially some pixel color issues around edges (esp. after paint bucket?) - maybe need to offset pixel values with canvas
   // mouse 2 for second color
-  // option to resize canvas
   // zoom?
     // utilize cell size change
   // Clean up UI
     // Fontawesome icons
+  // settimeout fill animations
 
 // ========================== Cell ======================== //
 

@@ -23,28 +23,63 @@
     <div class="wrapper">
       <div class="controlBar">
 
-        <!-- color picker -->
-        <label for="colorPicker">Color:</label>
-        <input type="color" id="colorPicker">
+        <div class="top">
+          <!-- color picker -->
+          <div class="control">
+            <label for="colorPicker">Color</label>
+            <input type="color" id="colorPicker">
+          </div>
+  
+          <!-- brush size -->
+          <div class="control">
+            <label for="brushSize">Brush Size</label>
+            <input type="range" id="brushSize" min="1" max="50" value="1">
+          </div>
+  
+          <!-- resize canvas -->
+          <form class="resize">
+            <p>Resize (px): </p>
+            <div class="control">
+              <label for="resizeX">Width</label>
+              <input type="text" id="resizeX">
+            </div>
+            <div class="control">
+              <label for="resizeY">Height</label>
+              <input type="text" id="resizeY">
+            </div>
+            <button type="submit">Resize</button>
+          </form>
 
-        <!-- brush size -->
-        <label for="brushSize">Brush Size:</label>
-        <input type="range" id="brushSize" min="1" max="50" value="1">
-
-        <!-- clear canvas -->
-        <label for="clear">Clear:</label>
-        <button type="button" id="clear">Clear</button>
+          <!-- clear canvas -->
+          <div class="control">
+            <label class="sr-only" for="clear">Clear</label>
+            <button type="button" id="clear">Clear</button>
+          </div>
+        </div>
 
         <!-- brush types -->
         <fieldset id="brushTypes">
-          <label for="pencil">Pencil:</label>
-          <input type="radio" name="brushType" id="pencil" value="pencil" checked>
-          <label for="paintBucket">Paint bucket:</label>
-          <input type="radio" name="brushType" id="paintBucket" value="fill">
-          <label for="dropper">Dropper:</label>
-          <input type="radio" name="brushType" id="dropper" value="dropper">
-          <label for="eraser">Eraser:</label>
-          <input type="radio" name="brushType" id="eraser" value="eraser">
+          <legend>Brush Type</legend>
+
+          <div class="control">
+            <label for="pencil">Pencil</label>
+            <input type="radio" name="brushType" id="pencil" value="pencil" checked>
+          </div>
+          
+          <div class="control">
+            <label for="paintBucket">Paint bucket</label>
+            <input type="radio" name="brushType" id="paintBucket" value="fill">
+          </div>
+          
+          <div class="control">
+            <label for="dropper">Dropper</label>
+            <input type="radio" name="brushType" id="dropper" value="dropper">
+          </div>
+          
+          <div class="control">
+            <label for="eraser">Eraser</label>
+            <input type="radio" name="brushType" id="eraser" value="eraser">
+          </div>
         </fieldset>
       </div>
       <canvas id="paintCanvas"></canvas>

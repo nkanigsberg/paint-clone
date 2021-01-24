@@ -43,6 +43,10 @@ h1 {
   text-align: center;
 }
 
+p {
+  margin: 0.5rem;
+}
+
 canvas {
   border: 2px solid white;
   display: block;
@@ -54,7 +58,50 @@ canvas,
   margin: 0 auto;
 }
 
+.controlBar .top {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+
+.control  {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;  
+}
+
+.control,
+form.resize {
+  margin-right: 3rem;
+}
+
 footer {
   margin-top: 50px;
   text-align: center;
+}
+
+input#brushSize {
+  width: 10rem;
+}
+
+form.resize {
+  display: flex;
+  align-items: flex-end;
+}
+
+form.resize .control {
+  margin: 0 0.25rem;
+}
+
+form.resize button {
+  height: 2.5rem;
+}
+
+form.resize input {
+  width: 6rem;
+}
+
+fieldset#brushTypes {
+  display: flex;
 }
