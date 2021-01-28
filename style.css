@@ -72,7 +72,7 @@ canvas,
 }
 
 .control,
-form.resize {
+form#resize {
   margin-right: 3rem;
 }
 
@@ -85,20 +85,20 @@ input#brushSize {
   width: 10rem;
 }
 
-form.resize {
+form#resize {
   display: flex;
   align-items: flex-end;
 }
 
-form.resize .control {
+form#resize .control {
   margin: 0 0.25rem;
 }
 
-form.resize button {
+form#resize button {
   height: 2.5rem;
 }
 
-form.resize input {
+form#resize input {
   width: 6rem;
 }
 

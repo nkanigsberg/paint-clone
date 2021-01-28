@@ -11,7 +11,9 @@
     // utilize cell size change
   // Clean up UI
     // Fontawesome icons
-  // settimeout fill animations
+	// settimeout fill animations
+	// undo/redo
+	// paste image file
 
 // ========================== Cell ======================== //
 
@@ -85,13 +87,14 @@ class Cell {
 /** @namespace life */
 const paint = {};
 
+paint.boardWidth = 800;
+paint.boardHeight = 600;
+
 // constants
 paint.CELL_WIDTH = 1;
 paint.CELL_HEIGHT = 1;
-paint.BOARD_WIDTH = 800;
-paint.BOARD_HEIGHT = 600;
-paint.NUM_COLUMNS = paint.BOARD_WIDTH / paint.CELL_WIDTH;
-paint.NUM_ROWS = paint.BOARD_HEIGHT / paint.CELL_HEIGHT;
+paint.NUM_COLUMNS = paint.boardWidth / paint.CELL_WIDTH;
+paint.NUM_ROWS = paint.boardHeight / paint.CELL_HEIGHT;
 paint.DEFAULT_COLOR = '#ffffff';
 
 // html elements
@@ -102,6 +105,7 @@ paint.colorPicker = document.getElementById("colorPicker");
 paint.brushSizeSlider = document.getElementById("brushSize");
 paint.brushTypes = document.getElementById("brushTypes");
 paint.clearBtn = document.getElementById("clear");
+paint.resizeForm = document.getElementById("resize");
 
 /** The 2D array representation of the game board */
 paint.board = [];
@@ -142,7 +146,7 @@ paint.initializeBoard = () => {
  * */
 paint.drawBoard = (color) => {
   paint.ctx.fillStyle = color;
-  paint.ctx.fillRect(0, 0, paint.BOARD_WIDTH, paint.BOARD_HEIGHT);
+  paint.ctx.fillRect(0, 0, paint.boardWidth, paint.boardHeight);
 
   // reset color info for each cell
   paint.board.forEach(row => {
@@ -442,12 +446,22 @@ paint.clearBtnClickHandler = () => {
   paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
+/** Resize the canvas to the specified dimensions */
+paint.resizeFormSubmitHandler = e => {
+	e.preventDefault();
+	const sizeX = e.target.elements.resizeX.value;
+	const sizeY = e.target.elements.resizeY.value;
+	console.log(sizeX, sizeY);
+
+
+}
+
 
 // ==================== Initialize =================== //
 paint.init = () => {
   // set html canvas dimensions
-  paint.canvas.setAttribute('width', paint.BOARD_WIDTH);
-  paint.canvas.setAttribute('height', paint.BOARD_HEIGHT);
+  paint.canvas.setAttribute('width', paint.boardWidth);
+  paint.canvas.setAttribute('height', paint.boardHeight);
 
   // initialize and draw the board
   paint.initializeBoard();
@@ -470,7 +484,7 @@ paint.init = () => {
   // set default brush type
   for (let i in paint.brushTypes.elements) {
     if (paint.brushTypes.elements[i].checked) {
-      console.log(paint.brushTypes.elements[i]);
+      // console.log(paint.brushTypes.elements[i]);
       paint.brushType = paint.brushTypes.elements[i].value; // set default
     }
   }
@@ -478,8 +492,9 @@ paint.init = () => {
   if (paint.brushType === 'eraser') paint.color = paint.DEFAULT_COLOR;
 
   // clear button listener
-  paint.clearBtn.addEventListener("click", paint.clearBtnClickHandler);
-
+	paint.clearBtn.addEventListener("click", paint.clearBtnClickHandler);
+	
+	paint.resizeForm.addEventListener("submit", paint.resizeFormSubmitHandler);
 }
 
 
