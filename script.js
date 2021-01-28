@@ -25,8 +25,11 @@ class Cell {
   }
 
   /** draw this cell on the canvas */
-  draw(color = null) {
-    this.color = color ? color : paint.color;
+  draw(color = null, redraw) {
+		// if not redrawing, set the new color of this pixel
+		if (!redraw) {
+			this.color = color ? color : paint.color;
+		}
 
     const ctx = paint.ctx;
     const coordX = this.coordinates.x * paint.CELL_WIDTH;
@@ -154,15 +157,14 @@ paint.resizeBoard = (newWidth, newHeight) => {
 	paint.canvas.setAttribute('width', newWidth);
   paint.canvas.setAttribute('height', newHeight);
 
-	// if the new height is larger than current
+	// if the new height is greater than current height
 	if (newHeight > paint.boardHeight) {
-		console.log('true');
 		// loop through new rows and add to board array
 		for (let y = paint.numRows; y < newHeight; y++) {
 			// create new row
 			paint.board.push([]);
 
-			// populate new rows
+			// populate new rows with cells (full width)
 			for (let x = 0; x < newWidth; x++) {
 				// create new cell
 				paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
@@ -171,12 +173,24 @@ paint.resizeBoard = (newWidth, newHeight) => {
 
 		// loop through existing rows and add columns
 		for (let y = 0; y < paint.boardHeight; y++) {
-			// loop through new columns and add to the board array
+			// loop through new columns and add cells
 			for (let x = paint.numColumns; x < newWidth; x++) {
 				// create new cell
 				paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
 			}
 		}
+	// else if the new height is less than current height
+	} else if (newHeight < paint.boardHeight) {
+		// delete rows exceeding the new height
+		paint.board.splice(newHeight, paint.boardHeight - newHeight)
+	}
+
+	// if the new width is less than the current width
+	if (newWidth < paint.boardWidth) {
+		// loop through each row and delete cells exceeding width
+		paint.board.forEach(row => {
+			row.splice(newWidth, paint.boardWidth - newWidth)
+		})
 	}
 
 	console.log('initial x:', paint.boardWidth, 'y:', paint.boardHeight);
@@ -193,24 +207,34 @@ paint.resizeBoard = (newWidth, newHeight) => {
   // }
 
 	console.log('new x:', paint.board[0].length, 'y:', paint.board.length);
-	paint.drawBoard(paint.DEFAULT_COLOR);
+	paint.drawBoard();
 }
 
 /** 
  * Draw the board on the canvas 
- * @param {string} color - the color to draw the board
+ * @param {string} color - optional - will drawn entire canvas this color if specified
  * */
 paint.drawBoard = (color) => {
-  paint.ctx.fillStyle = color;
-  paint.ctx.fillRect(0, 0, paint.boardWidth, paint.boardHeight);
-
-  // reset color info for each cell
-  paint.board.forEach(row => {
-    row.forEach(cell => {
-      cell.color = color;
-    })
-  })
+	if (color) {
+		paint.ctx.fillStyle = color;
+		paint.ctx.fillRect(0, 0, paint.boardWidth, paint.boardHeight);
+	
+		// reset color info for each cell
+		paint.board.forEach(row => {
+			row.forEach(cell => {
+				cell.color = color;
+			})
+		})
+	} else {
+		// draw each cell
+		paint.board.forEach(row => {
+			row.forEach(cell => {
+				cell.draw(null, true);
+			})
+		})
+	}
 }
+
 
 /** draw at specified coordinates */
 paint.draw = (x, y) => {
