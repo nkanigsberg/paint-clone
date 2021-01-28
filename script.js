@@ -93,9 +93,10 @@ paint.boardHeight = 600;
 // constants
 paint.CELL_WIDTH = 1;
 paint.CELL_HEIGHT = 1;
-paint.NUM_COLUMNS = paint.boardWidth / paint.CELL_WIDTH;
-paint.NUM_ROWS = paint.boardHeight / paint.CELL_HEIGHT;
 paint.DEFAULT_COLOR = '#ffffff';
+
+paint.numColumns = paint.boardWidth / paint.CELL_WIDTH;
+paint.numRows = paint.boardHeight / paint.CELL_HEIGHT;
 
 // html elements
 paint.canvas = document.getElementById("paintCanvas");
@@ -130,14 +131,55 @@ paint.brushType = 'pencil';
 
 /** Create 2D array and draw the board */
 paint.initializeBoard = () => {
-  for (let y = 0; y < paint.NUM_ROWS; y++) {
+	paint.numColumns = paint.boardWidth / paint.CELL_WIDTH;
+	paint.numRows = paint.boardHeight / paint.CELL_HEIGHT;
+
+  for (let y = 0; y < paint.numRows; y++) {
     paint.board.push([]);
-    for (let x = 0; x < paint.NUM_COLUMNS; x++) {
+    for (let x = 0; x < paint.numColumns; x++) {
       paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
     }
   }
 
   paint.drawBoard(paint.DEFAULT_COLOR);
+}
+
+/**
+ * Resize the board to the new provided dimensions
+* @param {Number} newWidth - the new width of the canvas
+* @param {Number} newHeight - the new height of the canvas
+*/
+paint.resizeBoard = (newWidth, newHeight) => {
+	console.log(newHeight, paint.boardHeight);
+
+	// if the new height is larger than current
+	if (newHeight > paint.boardHeight) {
+		console.log('true');
+		// loop through new rows and add to the board array
+		for (let y = paint.numRows; y < newHeight; y++) {
+			// console.log(y);
+			paint.board.push([]);
+		}
+
+		// if the new width is larger than current
+		if (newWidth > paint.boardWidth) {
+			// loop through ALL columns (old and new) and add to the board array
+			for (let y = 0; y < newHeight; y++) {
+				for (let x = paint.numColumns; x < newWidth; x++) {
+					// console.log(x);
+					paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
+				}
+			}
+		}
+	}
+
+	console.log('initial x:', paint.boardWidth, 'y:', paint.boardHeight);
+
+	paint.boardWidth = newWidth;
+	paint.boardHeight = newHeight;
+
+	console.log('new x:', paint.board[0].length, 'y:', paint.board.length);
+	paint.drawBoard(paint.DEFAULT_COLOR);
 }
 
 /** 
@@ -309,7 +351,7 @@ paint.fill = (x, y) => {
 
     let reached_left = false;
     let reached_right = false;
-    while (y++ < paint.NUM_ROWS-1 && paint.board[y][x].color == originalColor) {
+    while (y++ < paint.numRows-1 && paint.board[y][x].color == originalColor) {
       paint.board[y][x].color = color;
       paint.board[y][x].draw();
 
@@ -324,7 +366,7 @@ paint.fill = (x, y) => {
         }
       }
 
-      if (x < paint.NUM_COLUMNS - 1) {
+      if (x < paint.numColumns - 1) {
         if (paint.board[y][x + 1].color == originalColor) {
           if (!reached_right) {
             pixelStack.push({ x: x + 1, y: y });
@@ -340,7 +382,7 @@ paint.fill = (x, y) => {
 
 /** Returns true if specified coordinates are inside the canvas, false otherwise */
 paint.isInsideCanvas = (x, y) => {
-  if (y < paint.NUM_ROWS && y >= 0 && x < paint.NUM_COLUMNS && x >= 0)
+  if (y < paint.numRows && y >= 0 && x < paint.numColumns && x >= 0)
     return true;
   else return false;
 }
@@ -449,11 +491,10 @@ paint.clearBtnClickHandler = () => {
 /** Resize the canvas to the specified dimensions */
 paint.resizeFormSubmitHandler = e => {
 	e.preventDefault();
-	const sizeX = e.target.elements.resizeX.value;
-	const sizeY = e.target.elements.resizeY.value;
-	console.log(sizeX, sizeY);
+	const sizeX = e.target.elements.resizeX.valueAsNumber;
+	const sizeY = e.target.elements.resizeY.valueAsNumber;
 
-
+	paint.resizeBoard(sizeX, sizeY);
 }
 
 
