@@ -150,33 +150,47 @@ paint.initializeBoard = () => {
 * @param {Number} newHeight - the new height of the canvas
 */
 paint.resizeBoard = (newWidth, newHeight) => {
-	console.log(newHeight, paint.boardHeight);
+	// resize the canvas
+	paint.canvas.setAttribute('width', newWidth);
+  paint.canvas.setAttribute('height', newHeight);
 
 	// if the new height is larger than current
 	if (newHeight > paint.boardHeight) {
 		console.log('true');
-		// loop through new rows and add to the board array
+		// loop through new rows and add to board array
 		for (let y = paint.numRows; y < newHeight; y++) {
-			// console.log(y);
+			// create new row
 			paint.board.push([]);
+
+			// populate new rows
+			for (let x = 0; x < newWidth; x++) {
+				// create new cell
+				paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
+			}
 		}
 
-		// if the new width is larger than current
-		if (newWidth > paint.boardWidth) {
-			// loop through ALL columns (old and new) and add to the board array
-			for (let y = 0; y < newHeight; y++) {
-				for (let x = paint.numColumns; x < newWidth; x++) {
-					// console.log(x);
-					paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
-				}
+		// loop through existing rows and add columns
+		for (let y = 0; y < paint.boardHeight; y++) {
+			// loop through new columns and add to the board array
+			for (let x = paint.numColumns; x < newWidth; x++) {
+				// create new cell
+				paint.board[y].push(new Cell({ y, x }, paint.DEFAULT_COLOR));
 			}
 		}
 	}
 
 	console.log('initial x:', paint.boardWidth, 'y:', paint.boardHeight);
 
+	// set new board dimensions
 	paint.boardWidth = newWidth;
 	paint.boardHeight = newHeight;
+	paint.numColumns = paint.boardWidth / paint.CELL_WIDTH;
+	paint.numRows = paint.boardHeight / paint.CELL_HEIGHT;
+
+	// DEBUG //
+	// for (let y = 0; y < paint.numRows; y++) {
+	// 	console.log(paint.board[y]);
+  // }
 
 	console.log('new x:', paint.board[0].length, 'y:', paint.board.length);
 	paint.drawBoard(paint.DEFAULT_COLOR);
